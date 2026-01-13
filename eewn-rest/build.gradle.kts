@@ -5,10 +5,10 @@ plugins {
 }
 
 dependencies {
-    //implementation project(':eesti-wordnet-db')
-    //implementation project(':eesti-wordnet-services')
-    //implementation project(':eesti-wordnet-model')
-    //implementation project(':eesti-wordnet-shared')
+    implementation(project(":eewn-db"))
+    //implementation project(':eewn-services')
+    //implementation project(':eewn-model')
+    //implementation project(':eewn-shared')
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
