@@ -10,7 +10,7 @@
   <ul>
     @for (word of results; track word.id) {
       <li (click)="selectWord(word)">
-        <span>{{ word.lemma }} ({{ word.partOfSpeech }})</span>
+        <span>{{ word.label ? word.label : word.lemma }} ({{ word.partOfSpeech }})</span>
         <span *ngIf="word.definition"> - {{ word.definition }}</span>
       </li>
     }

@@ -1,9 +1,12 @@
 package ee.tu.eewn.entity.core;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.OffsetDateTime;
 
 @Entity
+@Data
 @Table(name = "wnwb_synset")
 public class WnwbSynset {
     @Id

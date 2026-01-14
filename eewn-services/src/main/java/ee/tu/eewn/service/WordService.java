@@ -31,18 +31,25 @@ public class WordService implements InitializingBean {
     }
 
     public List<WordWithDefinitionDto> searchWords(String query) {
-        return searchCache.get(query, q -> wordRepository.searchByLemma(q).stream()
-                .map(word -> {
-                    var senses = senseRepository.findByLexicalEntryId(word.getId());
+        return searchCache.get(query, q -> senseRepository.findByLemmaAndLanguage(q, "est").stream()
+                .map(sense -> {
                     String definition = null;
-                    for (var sense : senses) {
-                        var defs = definitionRepository.findBySenseIdAndLang(sense.getId(), sense.getLexicalEntry().getLexicon().getLanguage());
-                        if (!defs.isEmpty()) {
-                            definition = defs.get(0).getText();
-                            break;
+                    var defs = definitionRepository.findBySenseIdAndLang(sense.getId(), sense.getLexicalEntry().getLexicon().getLanguage());
+                    if (!defs.isEmpty()) {
+                        definition = defs.get(0).getText();
+                    } else if (sense.getSynset() != null) {
+                        var synsetDefs = definitionRepository.findBySynsetIdAndLang(sense.getSynset().getId(), sense.getLexicalEntry().getLexicon().getLanguage());
+                        if (!synsetDefs.isEmpty()) {
+                            definition = synsetDefs.get(0).getText();
                         }
                     }
-                    return new WordWithDefinitionDto(word.getId(), word.getLemma(), word.getPartOfSpeech(), definition);
+                    WordWithDefinitionDto dto = new WordWithDefinitionDto();
+                    dto.setId(sense.getId());
+                    dto.setLemma(sense.getLexicalEntry().getLemma());
+                    dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());
+                    dto.setDefinition(definition);
+                    dto.setLabel(sense.getLabel());
+                    return dto;
                 })
                 .toList());
     }

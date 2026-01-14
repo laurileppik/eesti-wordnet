@@ -8,6 +8,7 @@ export interface WordWithDefinitionDto {
   lemma: string;
   partOfSpeech: string;
   definition?: string;
+  label?: string;
 }
 
 @Injectable({ providedIn: 'root' })

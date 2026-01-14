@@ -12,5 +12,5 @@ public class WordWithDefinitionDto {
     private String lemma;
     private String partOfSpeech;
     private String definition;
+    private String label;
 }
-
