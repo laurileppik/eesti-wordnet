@@ -6,14 +6,16 @@ plugins {
 
 dependencies {
     implementation(project(":eewn-db"))
-    //implementation project(':eewn-services')
-    //implementation project(':eewn-model')
+    implementation(project(":eewn-services"))
+    implementation(project(":eewn-model"))
     //implementation project(':eewn-shared')
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-starter-cache-test")
