@@ -1,7 +1,7 @@
 package ee.tu.eewn.controller;
 
 import ee.tu.eewn.dto.WordDetailsDto;
-import ee.tu.eewn.dto.WordDto;
+import ee.tu.eewn.dto.WordWithDefinitionDto;
 import ee.tu.eewn.service.WordDetailsService;
 import ee.tu.eewn.service.WordService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class WordController {
     private final WordDetailsService wordDetailsService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<WordDto>> searchWords(@RequestParam String query) {
+    public ResponseEntity<List<WordWithDefinitionDto>> searchWords(@RequestParam String query) {
         return ResponseEntity.ok(wordService.searchWords(query));
     }
 

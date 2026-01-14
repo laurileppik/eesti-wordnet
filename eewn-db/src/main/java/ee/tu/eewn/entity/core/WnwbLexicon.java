@@ -1,10 +1,13 @@
 package ee.tu.eewn.entity.core;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "wnwb_lexicon")
+@Data
 public class WnwbLexicon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

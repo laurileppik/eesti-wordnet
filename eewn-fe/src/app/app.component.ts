@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { SearchBarComponent } from './shared/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  imports: [
+    SearchBarComponent,
+  ],
 })
-export class AppComponent {
-  title = 'eesti-wordnet-fe';
-}
+export class AppComponent {}

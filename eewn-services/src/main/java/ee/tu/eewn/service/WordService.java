@@ -1,7 +1,10 @@
 package ee.tu.eewn.service;
 
-import ee.tu.eewn.dto.WordDto;
+
+import ee.tu.eewn.dto.WordWithDefinitionDto;
 import ee.tu.eewn.repository.WordRepository;
+import ee.tu.eewn.repository.SenseRepository;
+import ee.tu.eewn.repository.DefinitionRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +18,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class WordService implements InitializingBean {
     private final WordRepository wordRepository;
-    private Cache<String, List<WordDto>> searchCache;
+    private final SenseRepository senseRepository;
+    private final DefinitionRepository definitionRepository;
+    private Cache<String, List<WordWithDefinitionDto>> searchCache;
 
     @Override
     public void afterPropertiesSet() {
@@ -25,9 +30,20 @@ public class WordService implements InitializingBean {
                 .build();
     }
 
-    public List<WordDto> searchWords(String query) {
+    public List<WordWithDefinitionDto> searchWords(String query) {
         return searchCache.get(query, q -> wordRepository.searchByLemma(q).stream()
-                .map(word -> new WordDto(word.getId(), word.getLemma(), word.getPartOfSpeech()))
+                .map(word -> {
+                    var senses = senseRepository.findByLexicalEntryId(word.getId());
+                    String definition = null;
+                    for (var sense : senses) {
+                        var defs = definitionRepository.findBySenseIdAndLang(sense.getId(), sense.getLexicalEntry().getLexicon().getLanguage());
+                        if (!defs.isEmpty()) {
+                            definition = defs.get(0).getText();
+                            break;
+                        }
+                    }
+                    return new WordWithDefinitionDto(word.getId(), word.getLemma(), word.getPartOfSpeech(), definition);
+                })
                 .toList());
     }
 }

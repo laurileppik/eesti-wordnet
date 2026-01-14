@@ -1,0 +1,41 @@
+<input
+  type="text"
+  [(ngModel)]="query"
+  (keyup.enter)="onSearch()"
+  placeholder="Search for a word..."
+/>
+<button (click)="onSearch()">Search</button>
+
+@if (results.length > 0) {
+  <ul>
+    @for (word of results; track word.id) {
+      <li (click)="selectWord(word)">
+        <span>{{ word.lemma }} ({{ word.partOfSpeech }})</span>
+        <span *ngIf="word.definition"> - {{ word.definition }}</span>
+      </li>
+    }
+  </ul>
+}
+
+@if (wordDetails) {
+  <div>
+    <h3>Details for: {{ wordDetails.lemma }} ({{ wordDetails.partOfSpeech }})</h3>
+    @if (wordDetails.relations?.length > 0) {
+      <h4>Relations:</h4>
+      <ul>
+        @for (rel of wordDetails.relations; track rel.type) {
+          <li>
+            <strong>{{ rel.type }}:</strong>
+            @for (related of rel.relatedWords; let last = $last; track related.id) {
+              {{ related.lemma }}
+              @if (!last) {, }
+            }
+          </li>
+        }
+      </ul>
+    }
+    @else {
+      <div>No relations found.</div>
+    }
+  </div>
+}

@@ -1,10 +1,17 @@
 package ee.tu.eewn.entity.core;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "wnwb_definition")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class WnwbDefinition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
