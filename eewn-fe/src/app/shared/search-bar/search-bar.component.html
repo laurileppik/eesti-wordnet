@@ -1,22 +1,37 @@
-<input
-  type="text"
-  [(ngModel)]="query"
-  (keyup.enter)="onSearch()"
-  placeholder="Search for a word..."
-/>
-<button (click)="onSearch()">Search</button>
+<mat-form-field class="search-autocomplete-field" appearance="outline">
+  <input
+    matInput
+    type="search"
+    placeholder="Otsi mõnda sõna..."
+    [(ngModel)]="query"
+    (input)="onInput()"
+    (keyup.enter)="onSearch()"
+    [matAutocomplete]="auto"
+    autocomplete="off"
+  />
+  <button matSuffix mat-icon-button aria-label="Search" (click)="onSearch()">
+    <mat-icon>search</mat-icon>
+  </button>
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onAutocompleteSelect($event)">
+    @for (option of filteredOptions; track option) {
+      <mat-option [value]="option">
+        {{ option }}
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>
 
 @if (groupedResults.length > 0) {
   @for (group of groupedResults; track group.title) {
-    <div style="margin-top: 1em;">
-      <div style="font-weight: bold;">{{ group.title }}:</div>
+    <mat-card class="group-card">
+      <div class="group-title">{{ group.title }}</div>
       <ul>
         @for (word of group.words; track word.id) {
-          <li style="list-style:none;">
+          <li>
             <app-word-tree-node [word]="word"></app-word-tree-node>
           </li>
         }
       </ul>
-    </div>
+    </mat-card>
   }
 }

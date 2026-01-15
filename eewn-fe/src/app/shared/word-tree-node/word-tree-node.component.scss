@@ -1,0 +1,32 @@
+.word-tree-node {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+  margin-bottom: 0.7em;
+  padding: 0.7em 1em 0.7em 0.7em;
+  transition: box-shadow 0.2s;
+}
+.word-tree-node:hover {
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+}
+.word-header {
+  font-size: 1.08em;
+  color: #1976d2;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.word-children {
+  margin-top: 0.5em;
+  border-left: 2px solid #e3eafc;
+  padding-left: 1em;
+}
+.relation-type-block {
+  margin-bottom: 0.7em;
+}
+.relation-type-header {
+  color: #1565c0;
+  font-size: 1em;
+  margin-bottom: 0.2em;
+}

@@ -1,11 +1,16 @@
 import { Component } from '@angular/core';
-import { SearchBarComponent } from './shared/search-bar/search-bar.component';
+import { HeaderComponent } from './components/header/header.component';
+import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   templateUrl: './app.component.html',
   imports: [
-    SearchBarComponent,
+    CommonModule,
+    HeaderComponent,
+    RouterOutlet,
   ],
 })
 export class AppComponent {}

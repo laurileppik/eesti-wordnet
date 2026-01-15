@@ -7,6 +7,7 @@ import { WordService, WordWithDefinitionDto } from '../../services/word.service'
   standalone: true,
   imports: [CommonModule],
   templateUrl: './word-tree-node.component.html',
+  styleUrl: './word-tree-node.component.scss',
 })
 export class WordTreeNodeComponent implements OnInit {
   @Input() word!: WordWithDefinitionDto;
@@ -17,10 +18,10 @@ export class WordTreeNodeComponent implements OnInit {
   relations: { [type: string]: WordWithDefinitionDto[] } = {};
   relevantWords: string[] = [];
 
-  constructor(private wordService: WordService) {}
+  constructor(private readonly wordService: WordService) {}
 
   ngOnInit() {
-    if (this.word && this.word.relevantWords) {
+    if (this.word?.relevantWords) {
       this.relevantWords = this.word.relevantWords.filter(w => w !== this.word.lemma);
     }
   }
