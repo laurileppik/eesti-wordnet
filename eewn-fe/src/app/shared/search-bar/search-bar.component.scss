@@ -25,7 +25,6 @@
 
 input[matInput] {
   font-size: 1.1em;
-  padding: 0.7em 1em;
 }
 
 button[mat-icon-button] {
@@ -63,4 +62,8 @@ ul {
 li {
   list-style: none;
   margin-bottom: 0.5em;
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
 }

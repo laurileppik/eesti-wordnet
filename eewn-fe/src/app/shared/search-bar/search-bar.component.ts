@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatAutocompleteModule, MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { WordService, WordWithDefinitionDto, AutocompleteWordDto } from '../../services/word.service';
 import { WordTreeNodeComponent } from '../word-tree-node/word-tree-node.component';
 import { of } from 'rxjs';
@@ -26,6 +27,7 @@ import { debounceTime, switchMap } from 'rxjs/operators';
     MatCardModule,
     MatAutocompleteModule,
     MatIconModule,
+    MatSnackBarModule,
     WordTreeNodeComponent,
   ],
 })
@@ -37,7 +39,7 @@ export class SearchBarComponent {
   @ViewChild('auto') autocompletePanel?: MatAutocomplete;
   @ViewChild(MatAutocompleteTrigger) autocompleteTrigger?: MatAutocompleteTrigger;
 
-  constructor(private readonly wordService: WordService) {}
+  constructor(private readonly wordService: WordService, private readonly snackBar: MatSnackBar) {}
 
   onInput() {
     if (this.query.length > 0) {
@@ -65,6 +67,9 @@ export class SearchBarComponent {
       this.wordService.searchWords(this.query).subscribe(words => {
         this.results = words;
         this.autocompleteTrigger?.closePanel();
+        if (words.length === 0) {
+          this.snackBar.open('Tulemusi ei leitud', 'OK', { duration: 4000, panelClass: 'mat-warn' });
+        }
       });
     }
   }
@@ -72,10 +77,10 @@ export class SearchBarComponent {
   get groupedResults() {
     const groups: { [key: string]: { title: string, words: WordWithDefinitionDto[] } } = {};
     const posMap: { [key: string]: string } = {
-      n: 'Nimisõna',
-      v: 'Tegusõna',
-      b: 'Määrsõna',
-      a: 'Omadussõna',
+      n: 'Nimisõnad',
+      v: 'Tegusõnad',
+      b: 'Määrsõnad',
+      a: 'Omadussõnad',
     };
     for (const word of this.results) {
       const pos = word.partOfSpeech;

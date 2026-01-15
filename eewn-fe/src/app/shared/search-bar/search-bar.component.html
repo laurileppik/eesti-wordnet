@@ -25,13 +25,13 @@
   @for (group of groupedResults; track group.title) {
     <mat-card class="group-card">
       <div class="group-title">{{ group.title }}</div>
-      <ul>
+      <div class="group-words">
         @for (word of group.words; track word.id) {
-          <li>
+          <div class="word-result">
             <app-word-tree-node [word]="word"></app-word-tree-node>
-          </li>
+          </div>
         }
-      </ul>
+      </div>
     </mat-card>
   }
 }

@@ -1,7 +1,6 @@
 .search-page-container {
   max-width: 700px;
   margin: 2em auto;
-  padding: 2em;
   background: #f8fafd;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
@@ -27,4 +26,14 @@ button {
 }
 button:hover {
   background: #1565c0;
+}
+
+mat-card {
+  max-width: 1000px;
+  width: 100%;
+}
+
+mat-form-field {
+  max-width: 700px;
+  width: 100%;
 }

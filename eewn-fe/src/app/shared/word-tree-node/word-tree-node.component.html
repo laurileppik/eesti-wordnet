@@ -18,7 +18,7 @@
     }
   </div>
   @if (expanded) {
-    <div class="word-children" style="margin-left: 1.5em;">
+    <div class="word-children" style="margin-left: 0.3em;">
       @if (loading) {
         <div>Laen...</div>
       }
@@ -28,11 +28,11 @@
             <div class="relation-type-header"><strong>{{ type }}</strong></div>
             <ul>
               @for (related of relations[type]; track related.id) {
-                <li>
+                <div>
                   <div style="display: flex; align-items: center;">
                     <app-word-tree-node [word]="related" [relationType]="null"></app-word-tree-node>
                   </div>
-                </li>
+                </div>
               }
             </ul>
           </div>
