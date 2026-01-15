@@ -49,6 +49,9 @@ public class WordService implements InitializingBean {
                     dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());
                     dto.setDefinition(definition);
                     dto.setLabel(sense.getLabel());
+                    if (sense.getSynset() != null) {
+                        dto.setSynsetId(sense.getSynset().getId());
+                    }
                     return dto;
                 })
                 .toList());

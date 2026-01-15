@@ -2,9 +2,12 @@ package ee.tu.eewn.entity.relation;
 
 import ee.tu.eewn.entity.core.WnwbLexicon;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.OffsetDateTime;
 
 @Entity
+@Data
 @Table(name = "wnwb_synsetrelationtype")
 public class WnwbSynsetrelationtype {
     @Id

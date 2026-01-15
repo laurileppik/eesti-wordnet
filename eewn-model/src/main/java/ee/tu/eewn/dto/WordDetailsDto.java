@@ -14,4 +14,3 @@ public class WordDetailsDto {
     private String partOfSpeech;
     private List<RelationDto> relations;
 }
-

@@ -11,25 +11,47 @@
     @for (word of results; track word.id) {
       <li (click)="selectWord(word)">
         <span>{{ word.label ? word.label : word.lemma }} ({{ word.partOfSpeech }})</span>
-        <span *ngIf="word.definition"> - {{ word.definition }}</span>
+        @if (word.definition) {
+          <span> - {{ word.definition }}</span>
+        }
       </li>
     }
   </ul>
 }
 
-@if (wordDetails) {
+@if (selectedWord) {
   <div>
-    <h3>Details for: {{ wordDetails.lemma }} ({{ wordDetails.partOfSpeech }})</h3>
-    @if (wordDetails.relations?.length > 0) {
-      <h4>Relations:</h4>
+    <h3>Details for: {{ selectedWord.label ? selectedWord.label : selectedWord.lemma }} ({{ selectedWord.partOfSpeech }})</h3>
+    @if (relations && Object.keys(relations).length > 0) {
+      <h4>Synset Relations:</h4>
       <ul>
-        @for (rel of wordDetails.relations; track rel.type) {
+        @for (type of Object.keys(relations); track type) {
           <li>
-            <strong>{{ rel.type }}:</strong>
-            @for (related of rel.relatedWords; let last = $last; track related.id) {
-              {{ related.lemma }}
-              @if (!last) {, }
-            }
+            <strong>{{ type }}:</strong>
+            <ul>
+              @for (related of relations[type]; track related.id) {
+                <li>
+                  @if (related.label) {
+                    <span>{{ related.label }}</span>
+                  }
+                  @if (!related.label) {
+                    <span>ID: {{ related.id }}</span>
+                  }
+                  @if (related.comment) {
+                    <span> | Comment: {{ related.comment }}</span>
+                  }
+                  @if (related.synsetType) {
+                    <span> | Type: {{ related.synsetType }}</span>
+                  }
+                  @if (related.status) {
+                    <span> | Status: {{ related.status }}</span>
+                  }
+                  @if (related.lexicon?.language) {
+                    <span> | Lang: {{ related.lexicon.language }}</span>
+                  }
+                </li>
+              }
+            </ul>
           </li>
         }
       </ul>

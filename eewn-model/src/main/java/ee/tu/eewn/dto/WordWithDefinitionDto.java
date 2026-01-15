@@ -13,4 +13,5 @@ public class WordWithDefinitionDto {
     private String partOfSpeech;
     private String definition;
     private String label;
+    private Integer synsetId;
 }

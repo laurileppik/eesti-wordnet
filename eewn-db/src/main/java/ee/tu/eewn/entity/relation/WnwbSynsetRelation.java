@@ -2,11 +2,14 @@ package ee.tu.eewn.entity.relation;
 
 import ee.tu.eewn.entity.core.WnwbSynset;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.OffsetDateTime;
 
 @Entity
+@Data
 @Table(name = "wnwb_synsetrelation")
-public class WnwbSynsetrelation {
+public class WnwbSynsetRelation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -56,3 +59,4 @@ public class WnwbSynsetrelation {
     @Column(name = "rate", nullable = false)
     private Double rate;
 }
+

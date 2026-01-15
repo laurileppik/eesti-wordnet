@@ -12,4 +12,3 @@ public class RelationDto {
     private String type;
     private List<WordDto> relatedWords;
 }
-

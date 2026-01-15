@@ -16,6 +16,7 @@ export class SearchBarComponent {
   results: WordWithDefinitionDto[] = [];
   selectedWord: WordWithDefinitionDto | null = null;
   wordDetails: any = null;
+  relations: { [type: string]: any[] } = {};
 
   constructor(private readonly wordService: WordService) {}
 
@@ -31,9 +32,20 @@ export class SearchBarComponent {
 
   selectWord(word: WordWithDefinitionDto) {
     this.selectedWord = word;
-    this.wordService.getWordDetails(word.id)
-      .subscribe(details => {
-        this.wordDetails = details;
-      });
+    this.wordDetails = null;
+    this.relations = {};
+    console.log('SEL WORD:', word);
+    if (word.synsetId) {
+      console.log('Fetching relations synID:', word.synsetId);
+      this.wordService.getSynsetRelations(word.synsetId)
+        .subscribe(relations => {
+          console.log('REL:', relations);
+          this.relations = relations;
+        });
+    } else {
+      console.warn('NOT FOUND');
+    }
   }
+
+  protected readonly Object = Object;
 }
