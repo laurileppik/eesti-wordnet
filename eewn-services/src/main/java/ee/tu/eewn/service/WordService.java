@@ -51,9 +51,28 @@ public class WordService implements InitializingBean {
                     dto.setLabel(sense.getLabel());
                     if (sense.getSynset() != null) {
                         dto.setSynsetId(sense.getSynset().getId());
+                        dto.setRelevantWords(
+                            senseRepository.findBySynsetId(sense.getSynset().getId())
+                                .stream()
+                                .map(s -> s.getLexicalEntry().getLemma())
+                                .distinct()
+                                .toList()
+                        );
+                    } else {
+                        dto.setRelevantWords(List.of());
                     }
                     return dto;
                 })
                 .toList());
+    }
+
+    public List<String> getRelevantWordsForSense(Integer senseId) {
+        var senseOpt = senseRepository.findById(senseId);
+        if (senseOpt.isEmpty() || senseOpt.get().getSynset() == null) return List.of();
+        Integer synsetId = senseOpt.get().getSynset().getId();
+        return senseRepository.findBySynsetId(synsetId).stream()
+                .map(s -> s.getLexicalEntry().getLemma())
+                .distinct()
+                .toList();
     }
 }

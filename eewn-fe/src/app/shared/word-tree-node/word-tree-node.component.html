@@ -4,6 +4,9 @@
       <span><strong>{{ relationType }}:</strong> </span>
     }
     <span>{{ word.label ? word.label : word.lemma }} ({{ word.partOfSpeech }})</span>
+    @if (relevantWords.length > 0) {
+      <span style="color: #888; font-size: 0.95em;"> [{{ relevantWords.join(', ') }}]</span>
+    }
     @if (word.definition) {
       <span> - {{ word.definition }}</span>
     }

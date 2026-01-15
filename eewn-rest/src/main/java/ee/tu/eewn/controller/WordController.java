@@ -28,4 +28,10 @@ public class WordController {
         if (details == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(details);
     }
+
+    @GetMapping("/word/{id}/relevant-words")
+    public ResponseEntity<List<String>> getRelevantWords(@PathVariable Integer id) {
+        List<String> relevantWords = wordService.getRelevantWordsForSense(id);
+        return ResponseEntity.ok(relevantWords);
+    }
 }

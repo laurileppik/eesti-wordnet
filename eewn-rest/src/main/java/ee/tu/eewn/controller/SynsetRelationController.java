@@ -30,7 +30,7 @@ public class SynsetRelationController {
         }
         WnwbSynset synset = synsetOpt.get();
         List<WnwbSynsetRelation> relations = synsetRelationRepository.findAllBySynset(synset);
-        Map<String, List<WordWithDefinitionDto>> result = new HashMap<>();
+        Map<String, Set<WordWithDefinitionDto>> resultSet = new HashMap<>();
         for (WnwbSynsetRelation rel : relations) {
             String type = rel.getRelType().getName();
             WnwbSynset related = null;
@@ -85,8 +85,22 @@ public class SynsetRelationController {
                 }
             }
             if (dto != null) {
-                result.computeIfAbsent(type, k -> new ArrayList<>()).add(dto);
+                if (dto.getSynsetId() != null) {
+                    List<WnwbSense> allSenses = senseRepository.findBySynsetId(dto.getSynsetId());
+                    List<String> relevantWords = allSenses.stream()
+                        .map(s -> s.getLexicalEntry().getLemma())
+                        .distinct()
+                        .toList();
+                    dto.setRelevantWords(relevantWords);
+                } else {
+                    dto.setRelevantWords(List.of());
+                }
+                resultSet.computeIfAbsent(type, k -> new java.util.HashSet<>()).add(dto);
             }
+        }
+        Map<String, List<WordWithDefinitionDto>> result = new HashMap<>();
+        for (Map.Entry<String, Set<WordWithDefinitionDto>> entry : resultSet.entrySet()) {
+            result.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         return result;
     }

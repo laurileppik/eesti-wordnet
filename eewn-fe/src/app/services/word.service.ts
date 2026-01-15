@@ -10,6 +10,7 @@ export interface WordWithDefinitionDto {
   definition?: string;
   label?: string;
   synsetId?: number;
+  relevantWords?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,5 +33,9 @@ export class WordService {
 
   getWordBySynsetId(synsetId: number): Observable<WordWithDefinitionDto> {
     return this.http.get<WordWithDefinitionDto>(`${environment.apiUrl}/api/synset/${synsetId}/word`);
+  }
+
+  getRelevantWords(wordId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${environment.apiUrl}/api/word/${wordId}/relevant-words`);
   }
 }

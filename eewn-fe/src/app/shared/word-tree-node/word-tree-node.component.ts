@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WordService, WordWithDefinitionDto } from '../../services/word.service';
 
@@ -8,15 +8,22 @@ import { WordService, WordWithDefinitionDto } from '../../services/word.service'
   imports: [CommonModule],
   templateUrl: './word-tree-node.component.html',
 })
-export class WordTreeNodeComponent {
+export class WordTreeNodeComponent implements OnInit {
   @Input() word!: WordWithDefinitionDto;
   @Input() relationType: string | null = null;
 
   expanded = false;
   loading = false;
   relations: { [type: string]: WordWithDefinitionDto[] } = {};
+  relevantWords: string[] = [];
 
   constructor(private wordService: WordService) {}
+
+  ngOnInit() {
+    if (this.word && this.word.relevantWords) {
+      this.relevantWords = this.word.relevantWords.filter(w => w !== this.word.lemma);
+    }
+  }
 
   toggleExpand() {
     this.expanded = !this.expanded;
