@@ -2,6 +2,7 @@ package ee.tu.eewn.service;
 
 
 import ee.tu.eewn.dto.WordWithDefinitionDto;
+import ee.tu.eewn.dto.AutocompleteWordDto;
 import ee.tu.eewn.repository.WordRepository;
 import ee.tu.eewn.repository.SenseRepository;
 import ee.tu.eewn.repository.DefinitionRepository;
@@ -9,6 +10,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,6 +75,13 @@ public class WordService implements InitializingBean {
         return senseRepository.findBySynsetId(synsetId).stream()
                 .map(s -> s.getLexicalEntry().getLemma())
                 .distinct()
+                .toList();
+    }
+
+    public List<AutocompleteWordDto> autocompleteWords(String query) {
+        var results = wordRepository.findTop10ByLemmaStartingWithIgnoreCaseAndLanguage(query, "est", PageRequest.of(0, 10));
+        return results.stream()
+                .map(w -> new AutocompleteWordDto(w.getId(), w.getLemma()))
                 .toList();
     }
 }

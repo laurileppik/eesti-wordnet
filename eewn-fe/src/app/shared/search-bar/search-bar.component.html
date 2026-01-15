@@ -13,9 +13,9 @@
     <mat-icon>search</mat-icon>
   </button>
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onAutocompleteSelect($event)">
-    @for (option of filteredOptions; track option) {
-      <mat-option [value]="option">
-        {{ option }}
+    @for (option of filteredOptions; track option.id) {
+      <mat-option [value]="option.lemma">
+        {{ option.lemma }}
       </mat-option>
     }
   </mat-autocomplete>

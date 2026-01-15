@@ -1,5 +1,6 @@
 package ee.tu.eewn.controller;
 
+import ee.tu.eewn.dto.AutocompleteWordDto;
 import ee.tu.eewn.dto.WordDetailsDto;
 import ee.tu.eewn.dto.WordWithDefinitionDto;
 import ee.tu.eewn.service.WordDetailsService;
@@ -33,5 +34,10 @@ public class WordController {
     public ResponseEntity<List<String>> getRelevantWords(@PathVariable Integer id) {
         List<String> relevantWords = wordService.getRelevantWordsForSense(id);
         return ResponseEntity.ok(relevantWords);
+    }
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<List<AutocompleteWordDto>> autocompleteWords(@RequestParam String query) {
+        return ResponseEntity.ok(wordService.autocompleteWords(query));
     }
 }

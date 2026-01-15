@@ -13,6 +13,11 @@ export interface WordWithDefinitionDto {
   relevantWords?: string[];
 }
 
+export interface AutocompleteWordDto {
+  id: number;
+  lemma: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WordService {
   private readonly http = inject(HttpClient);
@@ -37,5 +42,9 @@ export class WordService {
 
   getRelevantWords(wordId: number): Observable<string[]> {
     return this.http.get<string[]>(`${environment.apiUrl}/api/word/${wordId}/relevant-words`);
+  }
+
+  autocompleteWords(query: string): Observable<AutocompleteWordDto[]> {
+    return this.http.get<AutocompleteWordDto[]>(`${environment.apiUrl}/api/autocomplete?query=${encodeURIComponent(query)}`);
   }
 }
