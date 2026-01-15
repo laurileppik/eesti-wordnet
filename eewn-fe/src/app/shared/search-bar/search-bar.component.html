@@ -6,12 +6,17 @@
 />
 <button (click)="onSearch()">Search</button>
 
-@if (results.length > 0) {
-  <ul>
-    @for (word of results; track word.id) {
-      <li style="list-style:none;">
-        <app-word-tree-node [word]="word"></app-word-tree-node>
-      </li>
-    }
-  </ul>
+@if (groupedResults.length > 0) {
+  @for (group of groupedResults; track group.title) {
+    <div style="margin-top: 1em;">
+      <div style="font-weight: bold;">{{ group.title }}:</div>
+      <ul>
+        @for (word of group.words; track word.id) {
+          <li style="list-style:none;">
+            <app-word-tree-node [word]="word"></app-word-tree-node>
+          </li>
+        }
+      </ul>
+    </div>
+  }
 }

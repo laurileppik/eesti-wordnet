@@ -26,4 +26,22 @@ export class SearchBarComponent {
         this.results = data.filter(word => word.lemma.toLowerCase() === this.query.trim().toLowerCase());
       });
   }
+
+  get groupedResults() {
+    const groups: { [key: string]: { title: string, words: WordWithDefinitionDto[] } } = {};
+    const posMap: { [key: string]: string } = {
+      n: 'Nimisõna',
+      v: 'Tegusõna',
+      b: 'Määrsõna',
+      a: 'Omadussõna',
+    };
+    for (const word of this.results) {
+      const pos = word.partOfSpeech;
+      if (!groups[pos]) {
+        groups[pos] = { title: posMap[pos] || pos, words: [] };
+      }
+      groups[pos].words.push(word);
+    }
+    return Object.values(groups);
+  }
 }
