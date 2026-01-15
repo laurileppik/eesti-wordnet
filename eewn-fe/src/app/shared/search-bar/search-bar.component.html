@@ -9,55 +9,9 @@
 @if (results.length > 0) {
   <ul>
     @for (word of results; track word.id) {
-      <li (click)="selectWord(word)">
-        <span>{{ word.label ? word.label : word.lemma }} ({{ word.partOfSpeech }})</span>
-        @if (word.definition) {
-          <span> - {{ word.definition }}</span>
-        }
+      <li style="list-style:none;">
+        <app-word-tree-node [word]="word"></app-word-tree-node>
       </li>
     }
   </ul>
-}
-
-@if (selectedWord) {
-  <div>
-    <h3>Details for: {{ selectedWord.label ? selectedWord.label : selectedWord.lemma }} ({{ selectedWord.partOfSpeech }})</h3>
-    @if (relations && Object.keys(relations).length > 0) {
-      <h4>Synset Relations:</h4>
-      <ul>
-        @for (type of Object.keys(relations); track type) {
-          <li>
-            <strong>{{ type }}:</strong>
-            <ul>
-              @for (related of relations[type]; track related.id) {
-                <li>
-                  @if (related.label) {
-                    <span>{{ related.label }}</span>
-                  }
-                  @if (!related.label) {
-                    <span>ID: {{ related.id }}</span>
-                  }
-                  @if (related.comment) {
-                    <span> | Comment: {{ related.comment }}</span>
-                  }
-                  @if (related.synsetType) {
-                    <span> | Type: {{ related.synsetType }}</span>
-                  }
-                  @if (related.status) {
-                    <span> | Status: {{ related.status }}</span>
-                  }
-                  @if (related.lexicon?.language) {
-                    <span> | Lang: {{ related.lexicon.language }}</span>
-                  }
-                </li>
-              }
-            </ul>
-          </li>
-        }
-      </ul>
-    }
-    @else {
-      <div>No relations found.</div>
-    }
-  </div>
 }

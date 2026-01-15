@@ -29,4 +29,8 @@ export class WordService {
   getSynsetRelations(synsetId: number): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/api/synset/${synsetId}/relations`);
   }
+
+  getWordBySynsetId(synsetId: number): Observable<WordWithDefinitionDto> {
+    return this.http.get<WordWithDefinitionDto>(`${environment.apiUrl}/api/synset/${synsetId}/word`);
+  }
 }

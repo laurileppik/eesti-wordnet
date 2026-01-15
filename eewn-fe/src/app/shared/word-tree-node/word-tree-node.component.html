@@ -1,0 +1,43 @@
+<div class="word-tree-node">
+  <div class="word-header" (click)="toggleExpand()" style="cursor:pointer;">
+    @if (relationType) {
+      <span><strong>{{ relationType }}:</strong> </span>
+    }
+    <span>{{ word.label ? word.label : word.lemma }} ({{ word.partOfSpeech }})</span>
+    @if (word.definition) {
+      <span> - {{ word.definition }}</span>
+    }
+    @if (!expanded) {
+      <span> [+]</span>
+    }
+    @if (expanded) {
+      <span> [-]</span>
+    }
+  </div>
+  @if (expanded) {
+    <div class="word-children" style="margin-left: 1.5em;">
+      @if (loading) {
+        <div>Laen...</div>
+      }
+      @if (!loading) {
+        @for (type of objectKeys(relations); track type) {
+          <div class="relation-type-block">
+            <div class="relation-type-header"><strong>{{ type }}</strong></div>
+            <ul>
+              @for (related of relations[type]; track related.id) {
+                <li>
+                  <div style="display: flex; align-items: center;">
+                    <app-word-tree-node [word]="related" [relationType]="null"></app-word-tree-node>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        @if (objectKeys(relations).length === 0) {
+          <div>Ei leidnud.</div>
+        }
+      }
+    </div>
+  }
+</div>
