@@ -51,6 +51,9 @@ export class SearchBarComponent {
         switchMap(q => this.wordService.autocompleteWords(q))
       ).subscribe(options => {
         this.filteredOptions = options.slice(0, 10);
+        if (this.filteredOptions.length === 0) {
+          this.snackBar.open('Tulemusi ei leitud', 'OK', { duration: 2000, panelClass: 'mat-warn' });
+        }
       });
     } else {
       this.filteredOptions = [];

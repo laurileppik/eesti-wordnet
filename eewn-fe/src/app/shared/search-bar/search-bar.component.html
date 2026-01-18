@@ -1,25 +1,27 @@
-<mat-form-field class="search-autocomplete-field" appearance="outline">
-  <input
-    matInput
-    type="search"
-    placeholder="Otsi mõnda sõna..."
-    [(ngModel)]="query"
-    (input)="onInput()"
-    (keyup.enter)="onSearch()"
-    [matAutocomplete]="auto"
-    autocomplete="off"
-  />
-  <button matSuffix mat-icon-button aria-label="Search" (click)="onSearch()">
-    <mat-icon>search</mat-icon>
-  </button>
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onAutocompleteSelect($event)">
-    @for (option of filteredOptions; track option.id) {
-      <mat-option [value]="option.lemma">
-        {{ option.lemma }}
-      </mat-option>
-    }
-  </mat-autocomplete>
-</mat-form-field>
+<div class="search-bar-center">
+  <mat-form-field class="search-autocomplete-field" appearance="outline">
+    <input
+      matInput
+      type="search"
+      placeholder="Otsi mõnda sõna..."
+      [(ngModel)]="query"
+      (input)="onInput()"
+      (keyup.enter)="onSearch()"
+      [matAutocomplete]="auto"
+      autocomplete="off"
+    />
+    <button matSuffix mat-icon-button aria-label="Search" (click)="onSearch()">
+      <mat-icon>search</mat-icon>
+    </button>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onAutocompleteSelect($event)">
+      @for (option of filteredOptions; track option.id) {
+        <mat-option [value]="option.lemma">
+          {{ option.lemma }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</div>
 
 @if (groupedResults.length > 0) {
   @for (group of groupedResults; track group.title) {
