@@ -24,7 +24,9 @@
     <ul>
       @for (sense of synset.senses; track sense.id) {
         <li>
-          {{ sense.lemma }} @if (sense.partOfSpeech) { <span>({{ sense.partOfSpeech }})</span> }
+          {{ sense.lemma }}
+          @if (sense.label) { <span>({{ sense.label }})</span> }
+          @if (sense.partOfSpeech) { <span>({{ sense.partOfSpeech }})</span> }
           @if (sense.status) { <span>[{{ sense.status }}]</span> }
           @if (sense.comment) { <span>- {{ sense.comment }}</span> }
         </li>

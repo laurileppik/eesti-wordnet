@@ -51,7 +51,8 @@ public class SynsetDetailsService {
                 s.getLexicalEntry().getLemma(),
                 s.getLexicalEntry().getPartOfSpeech(),
                 s.getStatus(),
-                s.getComment()
+                s.getComment(),
+                s.getLabel()
             )).toList(),
             relationDtos,
             tags.stream().map(t -> new TagDto(t.getTag().getId(), t.getTag().getCategory(), t.getTag().getValue())).toList()

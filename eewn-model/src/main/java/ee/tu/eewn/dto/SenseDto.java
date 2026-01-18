@@ -13,4 +13,5 @@ public class SenseDto {
     private String partOfSpeech;
     private String status;
     private String comment;
+    private String label;
 }
