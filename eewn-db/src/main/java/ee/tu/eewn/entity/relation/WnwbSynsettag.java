@@ -3,9 +3,12 @@ package ee.tu.eewn.entity.relation;
 import ee.tu.eewn.entity.core.WnwbSynset;
 import ee.tu.eewn.entity.meta.WnwbTag;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.OffsetDateTime;
 
 @Entity
+@Data
 @Table(name = "wnwb_synsettag")
 public class WnwbSynsettag {
     @Id

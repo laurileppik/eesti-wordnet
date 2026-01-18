@@ -3,11 +3,13 @@ package ee.tu.eewn.entity.core;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.List;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+@Data
 @Getter
 @Setter
 @NoArgsConstructor

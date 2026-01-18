@@ -1,0 +1,59 @@
+@if (loading) {
+  <div>Laadimine...</div>
+}
+@else if (error) {
+  <div>Viga andmete laadimisel.</div>
+}
+@else if (synset) {
+  <h2>{{ synset.label }}</h2>
+  <div><b>Tüüp:</b> {{ synset.synsetType }}</div>
+  <div><b>Staatus:</b> {{ synset.status }}</div>
+  @if (synset.comment) {
+    <div><b>Kommentaar:</b> {{ synset.comment }}</div>
+  }
+  @if (definitionsArray.length) {
+    <b>Definitsioonid:</b>
+    <ul>
+      @for (def of definitionsArray; track $index) {
+        <li>{{ def }}</li>
+      }
+    </ul>
+  }
+  @if (synset.senses.length) {
+    <b>Sõnad:</b>
+    <ul>
+      @for (sense of synset.senses; track sense.id) {
+        <li>
+          {{ sense.lemma }} @if (sense.partOfSpeech) { <span>({{ sense.partOfSpeech }})</span> }
+          @if (sense.status) { <span>[{{ sense.status }}]</span> }
+          @if (sense.comment) { <span>- {{ sense.comment }}</span> }
+        </li>
+      }
+    </ul>
+  }
+  @if (synset.relations.length) {
+    <b>Seosed:</b>
+    <ul>
+      @for (rel of synset.relations; track rel.relatedSynsetId) {
+        <li>
+          {{ rel.type }}:
+          <a [routerLink]="['/synsets', rel.relatedSynsetId]">
+            @if (rel.relatedLabel) {
+              {{ rel.relatedLabel }}
+            } @else {
+              {{ rel.relatedSynsetId }}
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  }
+  @if (synset.tags.length) {
+    <b>Sildid:</b>
+    <ul>
+      @for (tag of synset.tags; track tag.id) {
+        <li>{{ tag.category }}: {{ tag.value }}</li>
+      }
+    </ul>
+  }
+}

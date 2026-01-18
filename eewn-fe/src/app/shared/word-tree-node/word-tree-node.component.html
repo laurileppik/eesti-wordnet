@@ -1,5 +1,5 @@
 <div class="word-tree-node">
-  <div class="word-header" (click)="toggleExpand()" style="cursor:pointer;">
+  <div class="word-header" (click)="toggleExpand()" style="cursor:pointer;" tabindex="0" (keydown.enter)="toggleExpand()">
     @if (relationType) {
       <span><strong>{{ relationType }}:</strong> </span>
     }
@@ -43,4 +43,7 @@
       }
     </div>
   }
+  <button [routerLink]="['/synsets', word.synsetId]" *ngIf="word.synsetId">
+    Üksikasjad
+  </button>
 </div>

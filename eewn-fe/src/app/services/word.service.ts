@@ -47,4 +47,8 @@ export class WordService {
   autocompleteWords(query: string): Observable<AutocompleteWordDto[]> {
     return this.http.get<AutocompleteWordDto[]>(`${environment.apiUrl}/api/autocomplete?query=${encodeURIComponent(query)}`);
   }
+
+  getSynsetDetails(id: number): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/api/synsets/${id}`);
+  }
 }

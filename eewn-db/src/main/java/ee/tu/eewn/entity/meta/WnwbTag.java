@@ -1,9 +1,12 @@
 package ee.tu.eewn.entity.meta;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.OffsetDateTime;
 
 @Entity
+@Data
 @Table(name = "wnwb_tag")
 public class WnwbTag {
     @Id
