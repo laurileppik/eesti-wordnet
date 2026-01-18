@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WordService } from '../services/word.service';
 
@@ -9,7 +9,6 @@ import { WordService } from '../services/word.service';
   styleUrls: ['./synset-details-page.component.scss'],
   standalone: true,
   imports: [
-    RouterLink,
     CommonModule,
   ],
 })
@@ -19,11 +18,20 @@ export class SynsetDetailsPageComponent implements OnInit {
   loading = true;
   error = false;
 
-  constructor(private route: ActivatedRoute, private wordService: WordService) {}
+  constructor(private readonly route: ActivatedRoute, private readonly wordService: WordService, private readonly router: Router) {}
 
   ngOnInit(): void {
-    this.synsetId = Number(this.route.snapshot.paramMap.get('id'));
-    this.wordService.getSynsetDetails(this.synsetId).subscribe({
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      this.loadSynset(id);
+    });
+  }
+
+  loadSynset(id: number) {
+    this.synsetId = id;
+    this.loading = true;
+    this.error = false;
+    this.wordService.getSynsetDetails(id).subscribe({
       next: (data) => {
         if (!Array.isArray(data.definitions)) {
           if (typeof data.definitions === 'object' && data.definitions !== null) {
@@ -45,12 +53,16 @@ export class SynsetDetailsPageComponent implements OnInit {
   }
 
   get definitionsArray(): string[] {
-    if (!this.synset || !this.synset.definitions) return [];
+    if (!this.synset?.definitions) return [];
     if (Array.isArray(this.synset.definitions)) return this.synset.definitions;
     if (typeof this.synset.definitions === 'object' && this.synset.definitions !== null) {
       return Object.values(this.synset.definitions).filter(v => typeof v === 'string');
     }
     if (typeof this.synset.definitions === 'string') return [this.synset.definitions];
     return [];
+  }
+
+  onRelationClick(synsetId: number) {
+    this.router.navigate(['/synsets', synsetId]);
   }
 }

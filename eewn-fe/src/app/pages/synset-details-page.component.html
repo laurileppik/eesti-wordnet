@@ -34,16 +34,16 @@
   @if (synset.relations.length) {
     <b>Seosed:</b>
     <ul>
-      @for (rel of synset.relations; track rel.relatedSynsetId) {
+      @for (rel of synset.relations; track $index) {
         <li>
           {{ rel.type }}:
-          <a [routerLink]="['/synsets', rel.relatedSynsetId]">
+          <button type="button" class="link-button" (click)="onRelationClick(rel.relatedSynsetId)">
             @if (rel.relatedLabel) {
               {{ rel.relatedLabel }}
             } @else {
               {{ rel.relatedSynsetId }}
             }
-          </a>
+          </button>
         </li>
       }
     </ul>
