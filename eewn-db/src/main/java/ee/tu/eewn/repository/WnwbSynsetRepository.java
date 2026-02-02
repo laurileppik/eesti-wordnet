@@ -13,4 +13,7 @@ public interface WnwbSynsetRepository extends JpaRepository<WnwbSynset, Integer>
 
     @Query("SELECT s FROM WnwbSynset s WHERE s.lexicon.language = :language AND s.isDeleted = false")
     List<WnwbSynset> findByLexiconLanguage(@Param("language") String language);
+
+    @Query("SELECT s FROM WnwbSynset s WHERE s.label = :label AND s.lexicon.language = :language AND s.isDeleted = false")
+    List<WnwbSynset> findByLabelAndLanguage(@Param("label") String label, @Param("language") String language);
 }
