@@ -35,7 +35,7 @@ public class SynsetDetailsService {
         for (Map.Entry<String, List<WordWithDefinitionDto>> entry : relationsMap.entrySet()) {
             String type = entry.getKey();
             for (WordWithDefinitionDto dto : entry.getValue()) {
-                relationDtos.add(new SynsetRelationDto(type, dto.getSynsetId(), dto.getLemma()));
+                relationDtos.add(new SynsetRelationDto(type, dto.getSynsetId(), dto.getLemma(), dto.getRelevantWords()));
             }
         }
 

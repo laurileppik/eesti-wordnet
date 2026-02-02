@@ -45,6 +45,9 @@
             } @else {
               {{ rel.relatedSynsetId }}
             }
+            @if (rel.relevantWords && rel.relevantWords.length > 1) {
+              <span class="relevant-words">[{{ rel.relevantWords.join(', ') }}]</span>
+            }
           </button>
         </li>
       }
