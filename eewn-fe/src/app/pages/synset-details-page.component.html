@@ -61,4 +61,23 @@
       }
     </ul>
   }
+  @if (synset.externalReferences && synset.externalReferences.length) {
+    <b>Välised viited:</b>
+    <ul>
+      @for (extRef of synset.externalReferences; track $index) {
+        <li>
+          <b>{{ extRef.systemName }}</b>
+          @if (extRef.relationType) {
+            <span> relation(s) {{ extRef.relationType }}</span>
+          }
+          @if (extRef.words && extRef.words.length) {
+            <span> {{ extRef.words.join(', ') }}</span>
+          }
+          @if (extRef.definition) {
+            <span> {{ extRef.definition }}</span>
+          }
+        </li>
+      }
+    </ul>
+  }
 }

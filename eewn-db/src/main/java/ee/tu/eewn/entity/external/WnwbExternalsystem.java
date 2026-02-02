@@ -2,10 +2,12 @@ package ee.tu.eewn.entity.external;
 
 import ee.tu.eewn.entity.core.WnwbLexicon;
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "wnwb_externalsystem")
+@Data
 public class WnwbExternalsystem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

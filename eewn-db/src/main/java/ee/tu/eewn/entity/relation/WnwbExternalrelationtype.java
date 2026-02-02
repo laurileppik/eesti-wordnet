@@ -2,10 +2,12 @@ package ee.tu.eewn.entity.relation;
 
 import ee.tu.eewn.entity.core.WnwbLexicon;
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "wnwb_externalrelationtype")
+@Data
 public class WnwbExternalrelationtype {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

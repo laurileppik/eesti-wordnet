@@ -18,4 +18,5 @@ public class SynsetDetailsDto {
     private List<SenseDto> senses;
     private List<SynsetRelationDto> relations;
     private List<TagDto> tags;
+    private List<ExternalReferenceDto> externalReferences;
 }

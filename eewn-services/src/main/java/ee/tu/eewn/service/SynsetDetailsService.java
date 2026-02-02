@@ -22,6 +22,7 @@ public class SynsetDetailsService {
     private final DefinitionRepository definitionRepository;
     private final WnwbSynsettagRepository synsettagRepository;
     private final SynsetRelationService synsetRelationService;
+    private final ExternalReferenceService externalReferenceService;
 
     public SynsetDetailsDto getSynsetDetails(Integer id) {
         Optional<WnwbSynset> synsetOpt = synsetRepository.findById(id);
@@ -39,6 +40,8 @@ public class SynsetDetailsService {
             }
         }
 
+        List<ExternalReferenceDto> externalRefs = externalReferenceService.getExternalReferences(synset);
+
         return new SynsetDetailsDto(
             synset.getId(),
             synset.getLabel(),
@@ -55,7 +58,8 @@ public class SynsetDetailsService {
                 s.getLabel()
             )).toList(),
             relationDtos,
-            tags.stream().map(t -> new TagDto(t.getTag().getId(), t.getTag().getCategory(), t.getTag().getValue())).toList()
+            tags.stream().map(t -> new TagDto(t.getTag().getId(), t.getTag().getCategory(), t.getTag().getValue())).toList(),
+            externalRefs
         );
     }
 }

@@ -4,10 +4,12 @@ import ee.tu.eewn.entity.relation.WnwbExternalrelationtype;
 import ee.tu.eewn.entity.core.WnwbSense;
 import ee.tu.eewn.entity.core.WnwbSynset;
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "wnwb_externalref")
+@Data
 public class WnwbExternalref {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
