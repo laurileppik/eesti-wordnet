@@ -57,6 +57,8 @@ button[mat-icon-button]:hover {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   padding: 1.2em 1.5em 1em 1.5em;
+  width: 1000px;
+  max-width: 90vw;
 }
 
 .group-title {

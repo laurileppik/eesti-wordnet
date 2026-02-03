@@ -24,6 +24,7 @@
 </div>
 
 @if (groupedResults.length > 0) {
+  <div class="search-bar-center">
   @for (group of groupedResults; track group.title) {
     <mat-card class="group-card">
       <div class="group-title">{{ group.title }}</div>
@@ -36,4 +37,5 @@
       </div>
     </mat-card>
   }
+  </div>
 }
