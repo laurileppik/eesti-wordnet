@@ -17,6 +17,8 @@ export class SynsetDetailsPageComponent implements OnInit {
   synset: any;
   loading = true;
   error = false;
+  relationsExpanded = false;
+  externalReferencesExpanded = false;
 
   constructor(private readonly route: ActivatedRoute, private readonly wordService: WordService, private readonly router: Router) {}
 
@@ -31,6 +33,8 @@ export class SynsetDetailsPageComponent implements OnInit {
     this.synsetId = id;
     this.loading = true;
     this.error = false;
+    this.relationsExpanded = false;
+    this.externalReferencesExpanded = false;
     this.wordService.getSynsetDetails(id).subscribe({
       next: (data) => {
         if (!Array.isArray(data.definitions)) {
@@ -60,6 +64,37 @@ export class SynsetDetailsPageComponent implements OnInit {
     }
     if (typeof this.synset.definitions === 'string') return [this.synset.definitions];
     return [];
+  }
+
+  getSenseSubscript(sense: any): string {
+    let senseNumber = '';
+    if (sense.label) {
+      const match = sense.label.match(/_(\d+)\(/);
+      if (match) {
+        senseNumber = ` ${match[1]}`;
+      }
+    }
+    const pos = sense.partOfSpeech ? `(${sense.partOfSpeech})` : '';
+    return `${senseNumber}${pos}`;
+  }
+
+  toggleRelations(): void {
+    this.relationsExpanded = !this.relationsExpanded;
+  }
+
+  toggleExternalReferences(): void {
+    this.externalReferencesExpanded = !this.externalReferencesExpanded;
+  }
+
+  onToggleKeyDown(event: KeyboardEvent, section: 'relations' | 'externalReferences'): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      if (section === 'relations') {
+        this.toggleRelations();
+      } else if (section === 'externalReferences') {
+        this.toggleExternalReferences();
+      }
+    }
   }
 
   onRelationClick(synsetId: number) {

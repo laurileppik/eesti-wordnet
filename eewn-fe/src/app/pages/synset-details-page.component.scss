@@ -1,15 +1,140 @@
+:host {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+h2 {
+  color: #0056b3;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid #007bff;
+
+  .sense-subscript {
+    font-size: 0.6em;
+    vertical-align: sub;
+    color: #000000;
+  }
+}
+
+div, ul {
+  margin-bottom: 1rem;
+}
+
+b {
+  color: #0056b3;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+ul {
+  list-style: none;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+}
+
+li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e3f2fd;
+  color: #000000;
+  line-height: 1.6;
+}
+
+li:last-child {
+  border-bottom: none;
+}
+
 .link-button {
   background: none;
   border: none;
   color: #007bff;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0.25rem 0.5rem;
   font: inherit;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-block;
 }
 
-.link-button:hover,
+.link-button:hover {
+  color: #ffffff;
+  background-color: #0056b3;
+  text-decoration: none;
+}
+
 .link-button:focus {
+  color: #ffffff;
+  background-color: #0056b3;
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.relevant-words {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-left: 0.25rem;
+}
+
+span {
+  color: #000000;
+}
+
+.toggleable-section {
+  margin-bottom: 1rem;
+}
+
+.toggle-header {
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+  border-radius: 4px;
+  padding: 0.25rem;
+  margin: -0.25rem;
+  background: none;
+  border: none;
   color: #0056b3;
-  outline: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+  font-family: inherit;
+  text-align: left;
+
+  &:hover {
+    color: #007bff;
+  }
+
+  &:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+    color: #007bff;
+  }
+}
+
+.toggle-icon {
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-size: 0.8em;
+  transition: transform 0.2s ease;
+}
+
+div:first-child {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #0056b3;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  border: 2px solid #007bff;
 }

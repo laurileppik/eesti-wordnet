@@ -5,14 +5,22 @@
   <div>Viga andmete laadimisel.</div>
 }
 @else if (synset) {
-  <h2>{{ synset.label }}</h2>
+  <h2>
+    @if (synset.senses && synset.senses.length > 0) {
+      @for (sense of synset.senses; track sense.id; let isLast = $last) {
+        <span>{{ sense.lemma }}<sub class="sense-subscript">{{ getSenseSubscript(sense) }}</sub>@if (!isLast) {<span>, </span>}</span>
+      }
+    } @else {
+      {{ synset.label }}
+    }
+  </h2>
   <div><b>Tüüp:</b> {{ synset.synsetType }}</div>
   <div><b>Staatus:</b> {{ synset.status }}</div>
   @if (synset.comment) {
     <div><b>Kommentaar:</b> {{ synset.comment }}</div>
   }
   @if (definitionsArray.length) {
-    <b>Definitsioonid:</b>
+    <b>Definitsioon:</b>
     <ul>
       @for (def of definitionsArray; track $index) {
         <li>{{ def }}</li>
@@ -34,24 +42,31 @@
     </ul>
   }
   @if (synset.relations.length) {
-    <b>Seosed:</b>
-    <ul>
-      @for (rel of synset.relations; track $index) {
-        <li>
-          {{ rel.type }}:
-          <button type="button" class="link-button" (click)="onRelationClick(rel.relatedSynsetId)">
-            @if (rel.relatedLabel) {
-              {{ rel.relatedLabel }}
-            } @else {
-              {{ rel.relatedSynsetId }}
-            }
-            @if (rel.relevantWords && rel.relevantWords.length > 1) {
-              <span class="relevant-words">[{{ rel.relevantWords.join(', ') }}]</span>
-            }
-          </button>
-        </li>
+    <div class="toggleable-section">
+      <button type="button" class="toggle-header" (click)="toggleRelations()" [attr.aria-expanded]="relationsExpanded">
+        <span class="toggle-icon">{{ relationsExpanded ? '▼' : '▶' }}</span>
+        Seosed:
+      </button>
+      @if (relationsExpanded) {
+        <ul>
+          @for (rel of synset.relations; track $index) {
+            <li>
+              {{ rel.type }}:
+              <button type="button" class="link-button" (click)="onRelationClick(rel.relatedSynsetId)">
+                @if (rel.relatedLabel) {
+                  {{ rel.relatedLabel }}
+                } @else {
+                  {{ rel.relatedSynsetId }}
+                }
+                @if (rel.relevantWords && rel.relevantWords.length > 1) {
+                  <span class="relevant-words">[{{ rel.relevantWords.join(', ') }}]</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
       }
-    </ul>
+    </div>
   }
   @if (synset.tags.length) {
     <b>Sildid:</b>
@@ -62,22 +77,29 @@
     </ul>
   }
   @if (synset.externalReferences && synset.externalReferences.length) {
-    <b>Välised viited:</b>
-    <ul>
-      @for (extRef of synset.externalReferences; track $index) {
-        <li>
-          <b>{{ extRef.systemName }}</b>
-          @if (extRef.relationType) {
-            <span> relation(s) {{ extRef.relationType }}</span>
+    <div class="toggleable-section">
+      <button type="button" class="toggle-header" (click)="toggleExternalReferences()" [attr.aria-expanded]="externalReferencesExpanded">
+        <span class="toggle-icon">{{ externalReferencesExpanded ? '▼' : '▶' }}</span>
+        Välised viited:
+      </button>
+      @if (externalReferencesExpanded) {
+        <ul>
+          @for (extRef of synset.externalReferences; track $index) {
+            <li>
+              <b>{{ extRef.systemName }}</b>
+              @if (extRef.relationType) {
+                <span> relation(s) {{ extRef.relationType }}</span>
+              }
+              @if (extRef.words && extRef.words.length) {
+                <span> {{ extRef.words.join(', ') }}</span>
+              }
+              @if (extRef.definition) {
+                <span> {{ extRef.definition }}</span>
+              }
+            </li>
           }
-          @if (extRef.words && extRef.words.length) {
-            <span> {{ extRef.words.join(', ') }}</span>
-          }
-          @if (extRef.definition) {
-            <span> {{ extRef.definition }}</span>
-          }
-        </li>
+        </ul>
       }
-    </ul>
+    </div>
   }
 }
