@@ -11,4 +11,3 @@ public interface SenseRelationRepository extends JpaRepository<WnwbSenserelation
     @Query("SELECT sr FROM WnwbSenserelation sr WHERE sr.aSense = :sense OR sr.bSense = :sense")
     List<WnwbSenserelation> findAllBySense(@Param("sense") WnwbSense sense);
 }
-

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 //TODO Kui kasutusse ss extendi kõiki vajalikke reposid
+//TODO select * optmizing?
 @NoRepositoryBean
 public interface SoftDeleteRepository<T, ID> extends JpaRepository<T, ID> {
     @Query("SELECT e FROM #{#entityName} e WHERE e.isDeleted = false")

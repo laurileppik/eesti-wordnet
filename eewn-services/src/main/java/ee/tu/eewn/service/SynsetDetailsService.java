@@ -25,7 +25,7 @@ public class SynsetDetailsService {
     private final ExternalReferenceService externalReferenceService;
 
     public SynsetDetailsDto getSynsetDetails(Integer id) {
-        Optional<WnwbSynset> synsetOpt = synsetRepository.findById(id);
+        Optional<WnwbSynset> synsetOpt = synsetRepository.findByIdWithLexicon(id);
         if (synsetOpt.isEmpty()) return null;
         WnwbSynset synset = synsetOpt.get();
         List<WnwbDefinition> definitions = definitionRepository.findBySynsetIdAndLang(id, "est");

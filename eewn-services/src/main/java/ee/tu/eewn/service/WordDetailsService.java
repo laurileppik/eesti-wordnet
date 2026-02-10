@@ -19,7 +19,7 @@ public class WordDetailsService {
     private final SenseRelationRepository senseRelationRepository;
 
     public WordDetailsDto getWordDetails(Integer wordId) {
-        WnwbLexicalentry word = wordRepository.findById(wordId).orElse(null);
+        WnwbLexicalentry word = wordRepository.findByIdWithDetails(wordId).orElse(null);
         if (word == null) return null;
 
         List<WnwbSense> senses = word.getSenses();

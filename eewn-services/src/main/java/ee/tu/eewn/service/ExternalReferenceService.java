@@ -22,9 +22,53 @@ public class ExternalReferenceService {
     private final SenseRepository senseRepository;
     private final DefinitionRepository definitionRepository;
 
+    //TODO tee lühemaks
     public List<ExternalReferenceDto> getExternalReferences(WnwbSynset synset) {
         List<WnwbExternalref> externalRefs = externalrefRepository.findBySynset(synset);
         List<ExternalReferenceDto> result = new ArrayList<>();
+
+        Set<String> references = new HashSet<>();
+        for (WnwbExternalref ref : externalRefs) {
+            if (ref.getReference() != null && !ref.getReference().isBlank()) {
+                references.add(ref.getReference());
+            }
+        }
+
+        if (references.isEmpty()) {
+            for (WnwbExternalref ref : externalRefs) {
+                String systemName = ref.getSysId() != null ? ref.getSysId().getName() : "Unknown";
+                String relationType = ref.getRelType() != null ? ref.getRelType().getName() : "";
+                result.add(new ExternalReferenceDto(systemName, relationType, ref.getReference(),
+                    Collections.singletonList(ref.getReference()), ""));
+            }
+            return result;
+        }
+
+        List<WnwbSynset> englishSynsets = synsetRepository.findByLabelInAndLanguage(references, "eng");
+        Map<String, WnwbSynset> labelToSynsetMap = new HashMap<>();
+        Set<Integer> synsetIds = new HashSet<>();
+        for (WnwbSynset s : englishSynsets) {
+            labelToSynsetMap.put(s.getLabel(), s);
+            synsetIds.add(s.getId());
+        }
+
+        List<WnwbSense> allSenses = synsetIds.isEmpty() ? Collections.emptyList() :
+            senseRepository.findBySynsetIdIn(synsetIds);
+        Map<Integer, List<WnwbSense>> synsetIdToSensesMap = new HashMap<>();
+        for (WnwbSense sense : allSenses) {
+            if (sense.getSynset() != null) {
+                synsetIdToSensesMap.computeIfAbsent(sense.getSynset().getId(), k -> new ArrayList<>()).add(sense);
+            }
+        }
+
+        List<WnwbDefinition> allDefinitions = synsetIds.isEmpty() ? Collections.emptyList() :
+            definitionRepository.findBySynsetIdInAndLang(synsetIds, "eng");
+        Map<Integer, String> synsetIdToDefinitionMap = new HashMap<>();
+        for (WnwbDefinition def : allDefinitions) {
+            if (def.getSynset() != null && def.getText() != null && !def.getText().isBlank()) {
+                synsetIdToDefinitionMap.putIfAbsent(def.getSynset().getId(), def.getText());
+            }
+        }
 
         for (WnwbExternalref ref : externalRefs) {
             String systemName = ref.getSysId() != null ? ref.getSysId().getName() : "Unknown";
@@ -33,27 +77,25 @@ public class ExternalReferenceService {
             List<String> words = new ArrayList<>();
             String definition = "";
             if (reference != null && !reference.isBlank()) {
-                List<WnwbSynset> englishSynsets = synsetRepository.findByLabelAndLanguage(reference, "eng");
-                if (!englishSynsets.isEmpty()) {
-                    WnwbSynset englishSynset = englishSynsets.get(0);
-                    List<WnwbSense> senses = senseRepository.findBySynsetId(englishSynset.getId());
-                    for (WnwbSense sense : senses) {
-                        String lemma = sense.getLexicalEntry().getLemma();
-                        String label = sense.getLabel();
-                        String pos = sense.getLexicalEntry().getPartOfSpeech();
+                WnwbSynset englishSynset = labelToSynsetMap.get(reference);
+                if (englishSynset != null) {
+                    List<WnwbSense> senses = synsetIdToSensesMap.get(englishSynset.getId());
+                    if (senses != null) {
+                        for (WnwbSense sense : senses) {
+                            String lemma = sense.getLexicalEntry().getLemma();
+                            String label = sense.getLabel();
+                            String pos = sense.getLexicalEntry().getPartOfSpeech();
 
-                        if (label != null && !label.isBlank()) {
-                            words.add(lemma + " " + label + "(" + pos + ")");
-                        } else {
-                            words.add(lemma + " (" + pos + ")");
+                            if (label != null && !label.isBlank()) {
+                                words.add(lemma + " " + label + "(" + pos + ")");
+                            } else {
+                                words.add(lemma + " (" + pos + ")");
+                            }
                         }
                     }
-                    List<WnwbDefinition> definitions = definitionRepository.findBySynsetIdAndLang(
-                        englishSynset.getId(),
-                        "eng"
-                    );
-                    if (!definitions.isEmpty() && definitions.get(0).getText() != null) {
-                        definition = definitions.get(0).getText();
+                    String def = synsetIdToDefinitionMap.get(englishSynset.getId());
+                    if (def != null) {
+                        definition = def;
                     }
                 }
             }
