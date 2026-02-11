@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+// TODO vb lihtsalt WordDto-ks ja WordDto refactoda.
 public class WordWithDefinitionDto {
     private Integer id;
     private String lemma;

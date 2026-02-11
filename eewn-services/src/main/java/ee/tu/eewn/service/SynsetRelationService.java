@@ -1,6 +1,7 @@
 package ee.tu.eewn.service;
 
 import ee.tu.eewn.dto.WordWithDefinitionDto;
+import ee.tu.eewn.entity.core.WnwbDefinition;
 import ee.tu.eewn.entity.core.WnwbSense;
 import ee.tu.eewn.entity.core.WnwbSynset;
 import ee.tu.eewn.entity.relation.WnwbSynsetRelation;
@@ -21,133 +22,124 @@ public class SynsetRelationService {
     private final SenseRepository senseRepository;
     private final DefinitionRepository definitionRepository;
 
-    //TODO tee seda kohutavat meetodit lühemaks
     public Map<String, List<WordWithDefinitionDto>> getSynsetRelationsData(Integer id) {
-        Optional<WnwbSynset> synsetOpt = synsetRepository.findByIdWithLexicon(id);
-        if (synsetOpt.isEmpty()) {
+        WnwbSynset synset = synsetRepository.findByIdWithLexicon(id).orElse(null);
+        if (synset == null) {
             return Collections.emptyMap();
         }
-        WnwbSynset synset = synsetOpt.get();
         List<WnwbSynsetRelation> relations = synsetRelationRepository.findAllBySynset(synset);
         if (relations.isEmpty()) {
             return Collections.emptyMap();
         }
+        Map<Integer, String> relTypesBySynsetId = findRelatedSynsets(synset, relations);
+        if (relTypesBySynsetId.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<WnwbSense>> sensesBySynsetId = new HashMap<>();
+        for (WnwbSense sense : senseRepository.findBySynsetIdIn(relTypesBySynsetId.keySet())) {
+            if (sense.getSynset() != null) {
+                sensesBySynsetId.computeIfAbsent(sense.getSynset().getId(), k -> new ArrayList<>()).add(sense);
+            }
+        }
+
+        //TODO midagi cachemiseks?  15min evictioniga nt?
         Set<Integer> relatedSynsetIds = new HashSet<>();
         Map<Integer, String> synsetIdToRelationType = new HashMap<>();
+        loadDefinitions(sensesBySynsetId, synsetIdToRelationType);
 
+        return buildWordWithRelations(relTypesBySynsetId, sensesBySynsetId, synsetIdToRelationType);
+    }
+
+    private Map<Integer, String> findRelatedSynsets(WnwbSynset synset, List<WnwbSynsetRelation> relations) {
+        Map<Integer, String> synsetIdToRelationType = new HashMap<>();
         for (WnwbSynsetRelation rel : relations) {
             String type = rel.getRelType().getName();
-            WnwbSynset related = null;
-            if ("has_hypernym".equals(type) || "has_hyponym".equals(type)) {
-                if (rel.getASynset().equals(synset)) {
-                    related = rel.getBSynset();
-                }
-            } else {
-                related = rel.getASynset().equals(synset) ? rel.getBSynset() : rel.getASynset();
-            }
-
+            WnwbSynset related = findRelations(synset, rel, type);
             if (related != null) {
-                relatedSynsetIds.add(related.getId());
                 synsetIdToRelationType.put(related.getId(), type);
             }
         }
+        return synsetIdToRelationType;
+    }
 
-        if (relatedSynsetIds.isEmpty()) {
-            return Collections.emptyMap();
+    private WnwbSynset findRelations(WnwbSynset synset, WnwbSynsetRelation rel, String type) {
+        if ("has_hypernym".equals(type) || "has_hyponym".equals(type)) {
+            return rel.getASynset().equals(synset) ? rel.getBSynset() : null;
         }
+        return rel.getASynset().equals(synset) ? rel.getBSynset() : rel.getASynset();
+    }
 
-        List<WnwbSense> allSenses = senseRepository.findBySynsetIdIn(relatedSynsetIds);
-        Map<Integer, List<WnwbSense>> synsetIdToSensesMap = new HashMap<>();
-        Set<Integer> senseIds = new HashSet<>();
-        Set<Integer> synsetIdsForDefs = new HashSet<>();
-        groupSensesBySynset(allSenses, synsetIdToSensesMap, senseIds, synsetIdsForDefs);
+    private void loadDefinitions(Map<Integer, List<WnwbSense>> sensesBySynsetId,
+                                 Map<Integer, String> synsetIdToDefinitionMap) {
+        if (sensesBySynsetId.isEmpty()) {
+            return;
+        }
+        List<WnwbSense> firstSenseList = sensesBySynsetId.values().iterator().next();
+        if (firstSenseList.isEmpty()) {
+            return;
+        }
+        String language = firstSenseList.getFirst().getLexicalEntry().getLexicon().getLanguage();
+        List<WnwbDefinition> definitions = definitionRepository.findBySynsetIdInAndLang(
+            sensesBySynsetId.keySet(), language
+        );
+        for (WnwbDefinition definition : definitions) {
+            WnwbSynset synset = definition.getSynset();
+            String text = definition.getText();
+            if (synset != null && text != null && !text.isBlank() && !synsetIdToDefinitionMap.containsKey(synset.getId())) {
+                    synsetIdToDefinitionMap.put(synset.getId(), text);
+                }
+        }
+    }
 
-        Map<Integer, String> senseIdToDefinitionMap = new HashMap<>();
-        //TODO midagi cachemiseks?  15min evictioniga nt?
-        Map<Integer, String> synsetIdToDefinitionMap = new HashMap<>();
-        loadDefinitionsForSynsets(allSenses, synsetIdsForDefs, synsetIdToDefinitionMap);
-
-        Map<String, Set<WordWithDefinitionDto>> resultSet = new HashMap<>();
-        for (Integer relatedSynsetId : relatedSynsetIds) {
-            String type = synsetIdToRelationType.get(relatedSynsetId);
-            List<WnwbSense> senses = synsetIdToSensesMap.get(relatedSynsetId);
-
+    private Map<String, List<WordWithDefinitionDto>> buildWordWithRelations(
+        Map<Integer, String> relTypesBySynsetId,
+        Map<Integer, List<WnwbSense>> sensesBySynsetId,
+        Map<Integer, String> definitions
+    ) {
+        Map<String, List<WordWithDefinitionDto>> result = new HashMap<>();
+        for (Map.Entry<Integer, String> entry : relTypesBySynsetId.entrySet()) {
+            Integer synsetId = entry.getKey();
+            String relationType = entry.getValue();
+            List<WnwbSense> senses = sensesBySynsetId.get(synsetId);
             if (senses == null || senses.isEmpty()) {
                 continue;
             }
-            WordWithDefinitionDto dto = null;
+
+            WordWithDefinitionDto dto = createWordDto(senses, definitions);
+            List<String> relevantWords = new ArrayList<>();
             for (WnwbSense sense : senses) {
-                String definition = synsetIdToDefinitionMap.get(sense.getSynset().getId());
-
-                if (definition != null) {
-                    dto = new WordWithDefinitionDto();
-                    dto.setId(sense.getId());
-                    dto.setLemma(sense.getLexicalEntry().getLemma());
-                    dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());
-                    dto.setDefinition(definition);
-                    dto.setLabel(sense.getLabel());
-                    dto.setSynsetId(sense.getSynset().getId());
-                    break;
+                String lemma = sense.getLexicalEntry().getLemma();
+                if (!relevantWords.contains(lemma)) {
+                    relevantWords.add(lemma);
                 }
             }
-            if (dto == null) {
-                WnwbSense sense = senses.getFirst();
-                dto = new WordWithDefinitionDto();
-                dto.setId(sense.getId());
-                dto.setLemma(sense.getLexicalEntry().getLemma());
-                dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());
-                dto.setDefinition(null);
-                dto.setLabel(sense.getLabel());
-                if (sense.getSynset() != null) {
-                    dto.setSynsetId(sense.getSynset().getId());
-                }
-            }
-
-            if (dto.getSynsetId() != null) {
-                List<WnwbSense> synsetSenses = synsetIdToSensesMap.get(dto.getSynsetId());
-                if (synsetSenses != null) {
-                    List<String> relevantWords = synsetSenses.stream()
-                        .map(s -> s.getLexicalEntry().getLemma())
-                        .distinct()
-                        .toList();
-                    dto.setRelevantWords(relevantWords);
-                } else {
-                    dto.setRelevantWords(List.of());
-                }
-            } else {
-                dto.setRelevantWords(List.of());
-            }
-            resultSet.computeIfAbsent(type, k -> new HashSet<>()).add(dto);
-        }
-        Map<String, List<WordWithDefinitionDto>> result = new HashMap<>();
-        for (Map.Entry<String, Set<WordWithDefinitionDto>> entry : resultSet.entrySet()) {
-            result.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+            dto.setRelevantWords(relevantWords);
+            result.computeIfAbsent(relationType, k -> new ArrayList<>()).add(dto);
         }
         return result;
     }
 
-    private void loadDefinitionsForSynsets(List<WnwbSense> allSenses, Set<Integer> synsetIdsForDefs, Map<Integer, String> synsetIdToDefinitionMap) {
-        if (!allSenses.isEmpty()) {
-            String language = allSenses.getFirst().getLexicalEntry().getLexicon().getLanguage();
-            if (!synsetIdsForDefs.isEmpty()) {
-                var synsetDefs = definitionRepository.findBySynsetIdInAndLang(synsetIdsForDefs, language);
-                for (var def : synsetDefs) {
-                    if (def.getSynset() != null && def.getText() != null && !def.getText().isBlank()) {
-                        synsetIdToDefinitionMap.putIfAbsent(def.getSynset().getId(), def.getText());
-                    }
-                }
+    private WordWithDefinitionDto createWordDto(List<WnwbSense> senses, Map<Integer, String> definitions) {
+        for (WnwbSense sense : senses) {
+            String def = definitions.get(sense.getSynset().getId());
+            if (def != null) {
+                return buildWordDto(sense, def);
             }
         }
+        return buildWordDto(senses.getFirst(), null);
     }
 
-    private static void groupSensesBySynset(List<WnwbSense> allSenses, Map<Integer, List<WnwbSense>> synsetIdToSensesMap, Set<Integer> senseIds,
-                                  Set<Integer> synsetIdsForDefs) {
-        for (WnwbSense sense : allSenses) {
-            if (sense.getSynset() != null) {
-                synsetIdToSensesMap.computeIfAbsent(sense.getSynset().getId(), k -> new ArrayList<>()).add(sense);
-                senseIds.add(sense.getId());
-                synsetIdsForDefs.add(sense.getSynset().getId());
-            }
+    //TODO äkki saaks definitioni mõistlikumalt?
+    private WordWithDefinitionDto buildWordDto(WnwbSense sense, String definition) {
+        WordWithDefinitionDto dto = new WordWithDefinitionDto();
+        dto.setId(sense.getId());
+        dto.setLemma(sense.getLexicalEntry().getLemma());
+        dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());
+        dto.setDefinition(definition);
+        dto.setLabel(sense.getLabel());
+        if (sense.getSynset() != null) {
+            dto.setSynsetId(sense.getSynset().getId());
         }
+        return dto;
     }
 }
