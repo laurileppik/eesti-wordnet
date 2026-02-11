@@ -1,12 +1,9 @@
 package ee.tu.eewn.service;
 
 import ee.tu.eewn.dto.WordWithDefinitionDto;
-import ee.tu.eewn.entity.core.WnwbDefinition;
 import ee.tu.eewn.entity.core.WnwbSense;
 import ee.tu.eewn.entity.core.WnwbSynset;
 import ee.tu.eewn.entity.relation.WnwbSynsetRelation;
-import ee.tu.eewn.repository.DefinitionRepository;
-import ee.tu.eewn.repository.SenseRepository;
 import ee.tu.eewn.repository.SynsetRelationRepository;
 import ee.tu.eewn.repository.WnwbSynsetRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +16,7 @@ import java.util.*;
 public class SynsetRelationService {
     private final SynsetRelationRepository synsetRelationRepository;
     private final WnwbSynsetRepository synsetRepository;
-    private final SenseRepository senseRepository;
-    private final DefinitionRepository definitionRepository;
+    private final DataFetchService dataFetchService;
 
     public Map<String, List<WordWithDefinitionDto>> getSynsetRelationsData(Integer id) {
         WnwbSynset synset = synsetRepository.findByIdWithLexicon(id).orElse(null);
@@ -35,60 +31,39 @@ public class SynsetRelationService {
         if (relTypesBySynsetId.isEmpty()) {
             return Collections.emptyMap();
         }
-        Map<Integer, List<WnwbSense>> sensesBySynsetId = new HashMap<>();
-        for (WnwbSense sense : senseRepository.findBySynsetIdIn(relTypesBySynsetId.keySet())) {
-            if (sense.getSynset() != null) {
-                sensesBySynsetId.computeIfAbsent(sense.getSynset().getId(), k -> new ArrayList<>()).add(sense);
-            }
+
+        Map<Integer, List<WnwbSense>> sensesBySynsetId = dataFetchService.groupSensesBySynsetId(
+            relTypesBySynsetId.keySet()
+        );
+        String language = getLanguageFromSenses(sensesBySynsetId);
+        Map<Integer, String> definitionsBySynsetId = dataFetchService.getDefinitionsForSynsets(
+            relTypesBySynsetId.keySet(), language
+        );
+
+        return buildWordWithRelations(relTypesBySynsetId, sensesBySynsetId, definitionsBySynsetId);
+    }
+
+    private String getLanguageFromSenses(Map<Integer, List<WnwbSense>> sensesBySynsetId) {
+        if (sensesBySynsetId.isEmpty()) {
+            return "est";
         }
-
-        //TODO midagi cachemiseks?  15min evictioniga nt?
-        Set<Integer> relatedSynsetIds = new HashSet<>();
-        Map<Integer, String> synsetIdToRelationType = new HashMap<>();
-        loadDefinitions(sensesBySynsetId, synsetIdToRelationType);
-
-        return buildWordWithRelations(relTypesBySynsetId, sensesBySynsetId, synsetIdToRelationType);
+        List<WnwbSense> firstSenseList = sensesBySynsetId.values().iterator().next();
+        if (firstSenseList.isEmpty()) {
+            return "est";
+        }
+        return firstSenseList.getFirst().getLexicalEntry().getLexicon().getLanguage();
     }
 
     private Map<Integer, String> findRelatedSynsets(WnwbSynset synset, List<WnwbSynsetRelation> relations) {
         Map<Integer, String> synsetIdToRelationType = new HashMap<>();
         for (WnwbSynsetRelation rel : relations) {
             String type = rel.getRelType().getName();
-            WnwbSynset related = findRelations(synset, rel, type);
+            WnwbSynset related = rel.getASynset().equals(synset) ? rel.getBSynset() : rel.getASynset();
             if (related != null) {
                 synsetIdToRelationType.put(related.getId(), type);
             }
         }
         return synsetIdToRelationType;
-    }
-
-    private WnwbSynset findRelations(WnwbSynset synset, WnwbSynsetRelation rel, String type) {
-        if ("has_hypernym".equals(type) || "has_hyponym".equals(type)) {
-            return rel.getASynset().equals(synset) ? rel.getBSynset() : null;
-        }
-        return rel.getASynset().equals(synset) ? rel.getBSynset() : rel.getASynset();
-    }
-
-    private void loadDefinitions(Map<Integer, List<WnwbSense>> sensesBySynsetId,
-                                 Map<Integer, String> synsetIdToDefinitionMap) {
-        if (sensesBySynsetId.isEmpty()) {
-            return;
-        }
-        List<WnwbSense> firstSenseList = sensesBySynsetId.values().iterator().next();
-        if (firstSenseList.isEmpty()) {
-            return;
-        }
-        String language = firstSenseList.getFirst().getLexicalEntry().getLexicon().getLanguage();
-        List<WnwbDefinition> definitions = definitionRepository.findBySynsetIdInAndLang(
-            sensesBySynsetId.keySet(), language
-        );
-        for (WnwbDefinition definition : definitions) {
-            WnwbSynset synset = definition.getSynset();
-            String text = definition.getText();
-            if (synset != null && text != null && !text.isBlank() && !synsetIdToDefinitionMap.containsKey(synset.getId())) {
-                    synsetIdToDefinitionMap.put(synset.getId(), text);
-                }
-        }
     }
 
     private Map<String, List<WordWithDefinitionDto>> buildWordWithRelations(

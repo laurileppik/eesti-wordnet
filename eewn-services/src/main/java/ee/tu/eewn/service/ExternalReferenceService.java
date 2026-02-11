@@ -3,12 +3,9 @@ package ee.tu.eewn.service;
 import ee.tu.eewn.dto.ExternalReferenceDto;
 import ee.tu.eewn.entity.core.WnwbSynset;
 import ee.tu.eewn.entity.core.WnwbSense;
-import ee.tu.eewn.entity.core.WnwbDefinition;
 import ee.tu.eewn.entity.external.WnwbExternalref;
 import ee.tu.eewn.repository.WnwbExternalrefRepository;
 import ee.tu.eewn.repository.WnwbSynsetRepository;
-import ee.tu.eewn.repository.SenseRepository;
-import ee.tu.eewn.repository.DefinitionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +16,7 @@ import java.util.*;
 public class ExternalReferenceService {
     private final WnwbExternalrefRepository externalrefRepository;
     private final WnwbSynsetRepository synsetRepository;
-    private final SenseRepository senseRepository;
-    private final DefinitionRepository definitionRepository;
+    private final DataFetchService dataFetchService;
 
     public List<ExternalReferenceDto> getExternalReferences(WnwbSynset synset) {
         List<WnwbExternalref> externalRefs = externalrefRepository.findBySynset(synset);
@@ -30,8 +26,13 @@ public class ExternalReferenceService {
         }
 
         Map<String, WnwbSynset> synsetsByLabel = findExternalSynsets(references);
-        Map<Integer, List<WnwbSense>> sensesBySynsetId = fetchSenses(synsetsByLabel.values());
-        Map<Integer, String> definitionsBySynsetId = fetchDefinitions(synsetsByLabel.values());
+        Set<Integer> synsetIds = new HashSet<>();
+        for (WnwbSynset s : synsetsByLabel.values()) {
+            synsetIds.add(s.getId());
+        }
+
+        Map<Integer, List<WnwbSense>> sensesBySynsetId = dataFetchService.groupSensesBySynsetId(synsetIds);
+        Map<Integer, String> definitionsBySynsetId = dataFetchService.getDefinitionsForSynsets(synsetIds, "eng");
 
         return buildExternalReferences(externalRefs, synsetsByLabel, sensesBySynsetId, definitionsBySynsetId);
     }
@@ -66,42 +67,6 @@ public class ExternalReferenceService {
         return labelToSynsetMap;
     }
 
-    private Map<Integer, List<WnwbSense>> fetchSenses(Collection<WnwbSynset> englishSynsets) {
-        Set<Integer> synsetIds = new HashSet<>();
-        for (WnwbSynset s : englishSynsets) {
-            synsetIds.add(s.getId());
-        }
-        if (synsetIds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        List<WnwbSense> senses = senseRepository.findBySynsetIdIn(synsetIds);
-        Map<Integer, List<WnwbSense>> sensesBySynsetId = new HashMap<>();
-        for (WnwbSense sense : senses) {
-            if (sense.getSynset() != null) {
-                sensesBySynsetId.computeIfAbsent(sense.getSynset().getId(), k -> new ArrayList<>()).add(sense);
-            }
-        }
-        return sensesBySynsetId;
-    }
-
-    private Map<Integer, String> fetchDefinitions(Collection<WnwbSynset> synsets) {
-        Set<Integer> synsetIds = new HashSet<>();
-        for (WnwbSynset synset : synsets) {
-            synsetIds.add(synset.getId());
-        }
-        if (synsetIds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        List<WnwbDefinition> allDefinitions = definitionRepository.findBySynsetIdInAndLang(synsetIds, "eng");
-        Map<Integer, String> synsetIdToDefinitionMap = new HashMap<>();
-        for (WnwbDefinition def : allDefinitions) {
-            if (def.getSynset() != null && def.getText() != null && !def.getText().isBlank()) {
-                synsetIdToDefinitionMap.putIfAbsent(def.getSynset().getId(), def.getText());
-            }
-        }
-        return synsetIdToDefinitionMap;
-    }
 
     private List<ExternalReferenceDto> buildExternalReferences(
             List<WnwbExternalref> externalRefs,
@@ -123,7 +88,6 @@ public class ExternalReferenceService {
     private List<String> extractWords(String reference, Map<String, WnwbSynset> synsetsByLabel,
                                       Map<Integer, List<WnwbSense>> sensesBySynsetId) {
         List<String> words = new ArrayList<>();
-        String definition = "";
         if (reference == null || reference.isBlank()) {
             return words;
         }

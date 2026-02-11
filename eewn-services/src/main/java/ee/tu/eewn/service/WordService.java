@@ -5,7 +5,6 @@ import ee.tu.eewn.dto.WordWithDefinitionDto;
 import ee.tu.eewn.dto.AutocompleteWordDto;
 import ee.tu.eewn.repository.WordRepository;
 import ee.tu.eewn.repository.SenseRepository;
-import ee.tu.eewn.repository.DefinitionRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class WordService implements InitializingBean {
     private final WordRepository wordRepository;
     private final SenseRepository senseRepository;
-    private final DefinitionRepository definitionRepository;
+    private final DataFetchService dataFetchService;
     private Cache<String, List<WordWithDefinitionDto>> searchCache;
 
     @Override
@@ -35,16 +34,8 @@ public class WordService implements InitializingBean {
     public List<WordWithDefinitionDto> searchWords(String query) {
         return searchCache.get(query, q -> senseRepository.findByLemmaAndLanguage(q, "est").stream()
                 .map(sense -> {
-                    String definition = null;
-                    var defs = definitionRepository.findBySenseIdAndLang(sense.getId(), sense.getLexicalEntry().getLexicon().getLanguage());
-                    if (!defs.isEmpty()) {
-                        definition = defs.get(0).getText();
-                    } else if (sense.getSynset() != null) {
-                        var synsetDefs = definitionRepository.findBySynsetIdAndLang(sense.getSynset().getId(), sense.getLexicalEntry().getLexicon().getLanguage());
-                        if (!synsetDefs.isEmpty()) {
-                            definition = synsetDefs.get(0).getText();
-                        }
-                    }
+                    String language = sense.getLexicalEntry().getLexicon().getLanguage();
+                    String definition = dataFetchService.getDefinitionForSense(sense, language);
                     WordWithDefinitionDto dto = new WordWithDefinitionDto();
                     dto.setId(sense.getId());
                     dto.setLemma(sense.getLexicalEntry().getLemma());
@@ -53,13 +44,7 @@ public class WordService implements InitializingBean {
                     dto.setLabel(sense.getLabel());
                     if (sense.getSynset() != null) {
                         dto.setSynsetId(sense.getSynset().getId());
-                        dto.setRelevantWords(
-                            senseRepository.findBySynsetId(sense.getSynset().getId())
-                                .stream()
-                                .map(s -> s.getLexicalEntry().getLemma())
-                                .distinct()
-                                .toList()
-                        );
+                        dto.setRelevantWords(dataFetchService.getLemmasForSynset(sense.getSynset().getId()));
                     } else {
                         dto.setRelevantWords(List.of());
                     }
@@ -70,12 +55,10 @@ public class WordService implements InitializingBean {
 
     public List<String> getRelevantWordsForSense(Integer senseId) {
         var senseOpt = senseRepository.findById(senseId);
-        if (senseOpt.isEmpty() || senseOpt.get().getSynset() == null) return List.of();
-        Integer synsetId = senseOpt.get().getSynset().getId();
-        return senseRepository.findBySynsetId(synsetId).stream()
-                .map(s -> s.getLexicalEntry().getLemma())
-                .distinct()
-                .toList();
+        if (senseOpt.isEmpty() || senseOpt.get().getSynset() == null) {
+            return List.of();
+        }
+        return dataFetchService.getLemmasForSynset(senseOpt.get().getSynset().getId());
     }
 
     public List<AutocompleteWordDto> autocompleteWords(String query) {
