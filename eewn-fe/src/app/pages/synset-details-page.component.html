@@ -8,24 +8,21 @@
   <h2>
     @if (synset.senses && synset.senses.length > 0) {
       @for (sense of synset.senses; track sense.id; let isLast = $last) {
-        <span>{{ sense.lemma }}<sub class="sense-subscript">{{ getSenseSubscript(sense) }}</sub>@if (!isLast) {<span>, </span>}</span>
+        <span>{{ sense.lemma }}<sub class="sense-subscript">{{ senseSubscript(sense) }}</sub>@if (!isLast) {<span>, </span>}</span>
       }
     } @else {
       {{ synset.label }}
     }
   </h2>
-  <div><b>Tüüp:</b> {{ synset.synsetType }}</div>
-  <div><b>Staatus:</b> {{ synset.status }}</div>
-  @if (synset.comment) {
-    <div><b>Kommentaar:</b> {{ synset.comment }}</div>
-  }
-  @if (definitionsArray.length) {
-    <b>Definitsioon:</b>
-    <ul>
-      @for (def of definitionsArray; track $index) {
-        <li>{{ def }}</li>
-      }
-    </ul>
+  @if (definitions.length) {
+    <div class="definition-block">
+      <b>Definitsioon:</b>
+      <ul>
+        @for (def of definitions; track $index) {
+          <li>{{ def }}</li>
+        }
+      </ul>
+    </div>
   }
   @if (synset.senses.length) {
     <b>Sõnad:</b>
@@ -41,30 +38,94 @@
       }
     </ul>
   }
-  @if (synset.relations.length) {
+
+  @if (hyponyms.length) {
     <div class="toggleable-section">
-      <button type="button" class="toggle-header" (click)="toggleRelations()" [attr.aria-expanded]="relationsExpanded">
-        <span class="toggle-icon">{{ relationsExpanded ? '▼' : '▶' }}</span>
-        Seosed:
+      <button type="button" class="toggle-header" (click)="toggleHyponyms()" [attr.aria-expanded]="hyponymsExpanded">
+        <span class="toggle-icon">{{ hyponymsExpanded ? '▼' : '▶' }}</span>
+        Hüponüümid:
       </button>
-      @if (relationsExpanded) {
+      @if (hyponymsExpanded) {
         <ul>
-          @for (rel of synset.relations; track $index) {
+          @for (rel of hyponyms; track $index) {
             <li>
-              {{ rel.type }}:
-              <button type="button" class="link-button" (click)="onRelationClick(rel.relatedSynsetId)">
+              <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)">
                 @if (rel.relatedLabel) {
                   {{ rel.relatedLabel }}
                 } @else {
                   {{ rel.relatedSynsetId }}
                 }
-                @if (rel.relevantWords && rel.relevantWords.length > 1) {
-                  <span class="relevant-words">[{{ rel.relevantWords.join(', ') }}]</span>
+                @if (displayRelevantWords(rel)) {
+                  <span class="relevant-words">[{{ displayRelevantWords(rel) }}]</span>
                 }
+                @if (rel.definition) { <span> - {{ rel.definition }}</span> }
               </button>
             </li>
           }
         </ul>
+      }
+    </div>
+  }
+
+  @if (hypernyms.length) {
+    <div class="toggleable-section">
+      <button type="button" class="toggle-header" (click)="toggleHypernyms()" [attr.aria-expanded]="hypernymsExpanded">
+        <span class="toggle-icon">{{ hypernymsExpanded ? '▼' : '▶' }}</span>
+        Hüperonüümid:
+      </button>
+      @if (hypernymsExpanded) {
+        <ul>
+          @for (rel of hypernyms; track $index) {
+            <li>
+              <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)">
+                @if (rel.relatedLabel) {
+                  {{ rel.relatedLabel }}
+                } @else {
+                  {{ rel.relatedSynsetId }}
+                }
+                @if (displayRelevantWords(rel)) {
+                  <span class="relevant-words">[{{ displayRelevantWords(rel) }}]</span>
+                }
+                @if (rel.definition) { <span> - {{ rel.definition }}</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  @if (otherRelationSections.length) {
+    <div class="toggleable-section">
+      <button type="button" class="toggle-header" (click)="toggleSection('seosed')" [attr.aria-expanded]="relationSectionsExpanded['seosed']">
+        <span class="toggle-icon">{{ relationSectionsExpanded['seosed'] ? '▼' : '▶' }}</span>
+        Seosed:
+      </button>
+      @if (relationSectionsExpanded['seosed']) {
+        <div class="seosed-groups">
+          @for (group of otherRelationSections; track group.type) {
+            <div class="relation-group">
+              <b>{{ group.label }}:</b>
+              <ul>
+                @for (rel of group.items; track $index) {
+                  <li>
+                    <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)">
+                      @if (rel.relatedLabel) {
+                        {{ rel.relatedLabel }}
+                      } @else {
+                        {{ rel.relatedSynsetId }}
+                      }
+                      @if (displayRelevantWords(rel)) {
+                        <span class="relevant-words">[{{ displayRelevantWords(rel) }}]</span>
+                      }
+                      @if (rel.definition) { <span> - {{ rel.definition }}</span> }
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
       }
     </div>
   }
@@ -78,7 +139,7 @@
   }
   @if (synset.externalReferences && synset.externalReferences.length) {
     <div class="toggleable-section">
-      <button type="button" class="toggle-header" (click)="toggleExternalReferences()" [attr.aria-expanded]="externalReferencesExpanded">
+      <button type="button" class="toggle-header" (click)="toggleExternalRefs()" [attr.aria-expanded]="externalReferencesExpanded">
         <span class="toggle-icon">{{ externalReferencesExpanded ? '▼' : '▶' }}</span>
         Välised viited:
       </button>
