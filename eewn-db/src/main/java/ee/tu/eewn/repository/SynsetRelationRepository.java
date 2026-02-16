@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface SynsetRelationRepository extends JpaRepository<WnwbSynsetRelation, Integer> {
     @EntityGraph(attributePaths = {"relType", "aSynset", "bSynset"})
-    @Query("SELECT sr FROM WnwbSynsetRelation sr WHERE sr.aSynset = :synset OR sr.bSynset = :synset")
+    @Query("SELECT sr FROM WnwbSynsetRelation sr WHERE sr.aSynset = :synset")
     List<WnwbSynsetRelation> findAllBySynset(@Param("synset") WnwbSynset synset);
 }

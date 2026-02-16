@@ -7,9 +7,14 @@
   justify-content: center;
 }
 
-.search-bar-center {
+.search-bar-input-center {
   display: flex;
   justify-content: center;
+  width: 100%;
+  margin-bottom: 2em;
+}
+
+.search-bar-center {
   width: 100%;
   margin-bottom: 2em;
 }

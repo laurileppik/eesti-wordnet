@@ -5,9 +5,9 @@ import ee.tu.eewn.entity.core.WnwbSynset;
 import ee.tu.eewn.entity.core.WnwbSense;
 import ee.tu.eewn.entity.core.WnwbDefinition;
 import ee.tu.eewn.entity.relation.WnwbSynsettag;
+import ee.tu.eewn.repository.DefinitionRepository;
 import ee.tu.eewn.repository.WnwbSynsetRepository;
 import ee.tu.eewn.repository.SenseRepository;
-import ee.tu.eewn.repository.DefinitionRepository;
 import ee.tu.eewn.repository.WnwbSynsettagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,17 +25,19 @@ public class SynsetDetailsService {
     private final ExternalReferenceService externalReferenceService;
 
     public SynsetDetailsDto getSynsetDetails(Integer id) {
-        Optional<WnwbSynset> synsetOpt = synsetRepository.findByIdWithLexicon(id);
-        if (synsetOpt.isEmpty()) return null;
-        WnwbSynset synset = synsetOpt.get();
+        WnwbSynset synset = synsetRepository.findByIdWithLexiconAndDefinitions(id).orElse(null);
+        if (synset == null) {
+            return null;
+        }
+
         List<WnwbDefinition> definitions = definitionRepository.findBySynsetIdAndLang(id, "est");
-        List<WnwbSense> senses = senseRepository.findBySynsetId(id);
         List<WnwbSynsettag> tags = synsettagRepository.findBySynset(synset);
-        Map<String, List<WordWithDefinitionDto>> relationsMap = synsetRelationService.getSynsetRelationsData(id);
+        List<WnwbSense> senses = senseRepository.findBySynsetId(id);
+        Map<String, List<WordWithRelationsDto>> relationsMap = synsetRelationService.getSynsetRelationsData(synset, id, false);
         List<SynsetRelationDto> relationDtos = new ArrayList<>();
-        for (Map.Entry<String, List<WordWithDefinitionDto>> entry : relationsMap.entrySet()) {
+        for (Map.Entry<String, List<WordWithRelationsDto>> entry : relationsMap.entrySet()) {
             String type = entry.getKey();
-            for (WordWithDefinitionDto dto : entry.getValue()) {
+            for (WordWithRelationsDto dto : entry.getValue()) {
                 relationDtos.add(new SynsetRelationDto(type, dto.getSynsetId(), dto.getLemma(), dto.getRelevantWords()));
             }
         }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -49,4 +51,7 @@ public class WnwbSynset {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lexicon_id", nullable = false)
     private WnwbLexicon lexicon;
+
+    @OneToMany(mappedBy = "synset", fetch = FetchType.LAZY)
+    private List<WnwbDefinition> definitions = new ArrayList<>();
 }

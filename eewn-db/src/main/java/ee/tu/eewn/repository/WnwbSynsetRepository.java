@@ -17,6 +17,9 @@ public interface WnwbSynsetRepository extends JpaRepository<WnwbSynset, Integer>
     @Query("SELECT s FROM WnwbSynset s WHERE s.id = :id")
     Optional<WnwbSynset> findByIdWithLexicon(@Param("id") Integer id);
 
+    @Query("SELECT DISTINCT s FROM WnwbSynset s LEFT JOIN FETCH s.definitions d LEFT JOIN FETCH s.lexicon l WHERE s.id = :id")
+    Optional<WnwbSynset> findByIdWithLexiconAndDefinitions(@Param("id") Integer id);
+
     @EntityGraph(attributePaths = {"lexicon"})
     @Query("SELECT s FROM WnwbSynset s WHERE s.lexicon.language = :language AND s.isDeleted = false")
     List<WnwbSynset> findByLexiconLanguage(@Param("language") String language);

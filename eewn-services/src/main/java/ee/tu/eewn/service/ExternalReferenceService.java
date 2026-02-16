@@ -13,15 +13,16 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+//TODO vt üle ma arvan, et siin on osad db query-d ebavajalikud ja saame vähemaga
 public class ExternalReferenceService {
     private final WnwbExternalrefRepository externalrefRepository;
     private final WnwbSynsetRepository synsetRepository;
     private final DataFetchService dataFetchService;
-
     public List<ExternalReferenceDto> getExternalReferences(WnwbSynset synset) {
         List<WnwbExternalref> externalRefs = externalrefRepository.findBySynset(synset);
         Set<String> references = findReferences(externalRefs);
         if (references.isEmpty()) {
+            //TODO pigem pole vaja ju, tühi list vms
             return buildSimpleReferenceDtos(externalRefs);
         }
 
@@ -59,6 +60,8 @@ public class ExternalReferenceService {
     }
 
     private Map<String, WnwbSynset> findExternalSynsets(Set<String> references) {
+        //TODO est ja eng jaoks mingi ENUM
+        //Leia labeli põhised ik synsetid
         List<WnwbSynset> englishSynsets = synsetRepository.findByLabelInAndLanguage(references, "eng");
         Map<String, WnwbSynset> labelToSynsetMap = new HashMap<>();
         for (WnwbSynset synset : englishSynsets) {

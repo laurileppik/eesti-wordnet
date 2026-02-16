@@ -1,7 +1,7 @@
 package ee.tu.eewn.service;
 
 
-import ee.tu.eewn.dto.WordWithDefinitionDto;
+import ee.tu.eewn.dto.WordWithRelationsDto;
 import ee.tu.eewn.dto.AutocompleteWordDto;
 import ee.tu.eewn.repository.WordRepository;
 import ee.tu.eewn.repository.SenseRepository;
@@ -21,7 +21,7 @@ public class WordService implements InitializingBean {
     private final WordRepository wordRepository;
     private final SenseRepository senseRepository;
     private final DataFetchService dataFetchService;
-    private Cache<String, List<WordWithDefinitionDto>> searchCache;
+    private Cache<String, List<WordWithRelationsDto>> searchCache;
 
     @Override
     public void afterPropertiesSet() {
@@ -31,12 +31,12 @@ public class WordService implements InitializingBean {
                 .build();
     }
 
-    public List<WordWithDefinitionDto> searchWords(String query) {
+    public List<WordWithRelationsDto> searchWords(String query) {
         return searchCache.get(query, q -> senseRepository.findByLemmaAndLanguage(q, "est").stream()
                 .map(sense -> {
                     String language = sense.getLexicalEntry().getLexicon().getLanguage();
                     String definition = dataFetchService.getDefinitionForSense(sense, language);
-                    WordWithDefinitionDto dto = new WordWithDefinitionDto();
+                    WordWithRelationsDto dto = new WordWithRelationsDto();
                     dto.setId(sense.getId());
                     dto.setLemma(sense.getLexicalEntry().getLemma());
                     dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());

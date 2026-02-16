@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+//TODO DTO-de jaoks eraldi failid ja kaust
 export interface WordWithDefinitionDto {
   id: number;
   lemma: string;
@@ -28,13 +29,10 @@ export class WordService {
     return this.http.get<WordWithDefinitionDto[]>(`${environment.apiUrl}/api/search?query=${encodeURIComponent(query)}`);
   }
 
-  getWordDetails(id: number): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/api/word/${id}`);
-  }
-
   getSynsetRelations(synsetId: number): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/api/synset/${synsetId}/relations`);
   }
+  //TODO siin veel kasutamata?
 
   getWordBySynsetId(synsetId: number): Observable<WordWithDefinitionDto> {
     return this.http.get<WordWithDefinitionDto>(`${environment.apiUrl}/api/synset/${synsetId}/word`);

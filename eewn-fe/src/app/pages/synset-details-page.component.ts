@@ -159,6 +159,7 @@ export class SynsetDetailsPageComponent implements OnInit {
 
   relationLabel(type: string) {
     if (!type) return 'Seosed';
+    // TODO 1 need hardcoded. 2 Siia peaks juurde lisama sense'i, et nt element(1(n)) keemiline element((1n))
     if (type === 'has_hyponym') return 'Hüponüümid';
     if (type === 'has_hypernym') return 'Hüperonüümid';
     return type.replace(/_/g, ' ');

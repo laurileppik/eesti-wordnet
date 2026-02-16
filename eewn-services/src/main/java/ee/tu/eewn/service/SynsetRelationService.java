@@ -1,29 +1,34 @@
 package ee.tu.eewn.service;
 
-import ee.tu.eewn.dto.WordWithDefinitionDto;
+import ee.tu.eewn.dto.WordWithRelationsDto;
 import ee.tu.eewn.entity.core.WnwbSense;
 import ee.tu.eewn.entity.core.WnwbSynset;
 import ee.tu.eewn.entity.relation.WnwbSynsetRelation;
 import ee.tu.eewn.repository.SynsetRelationRepository;
-import ee.tu.eewn.repository.WnwbSynsetRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+//TODO vt üle ma arvan, et siin on osad db query-d ebavajalikud ja saame vähemaga
 public class SynsetRelationService {
     private final SynsetRelationRepository synsetRelationRepository;
-    private final WnwbSynsetRepository synsetRepository;
     private final DataFetchService dataFetchService;
 
-    public Map<String, List<WordWithDefinitionDto>> getSynsetRelationsData(Integer id) {
-        WnwbSynset synset = synsetRepository.findByIdWithLexicon(id).orElse(null);
+    /**
+     * includeDefinitions - kui on true, siis definitsioonid fetchitakse ka
+     * */
+    public Map<String, List<WordWithRelationsDto>> getSynsetRelationsData(WnwbSynset synset, Integer id, boolean includeDefinitions) {
         if (synset == null) {
             return Collections.emptyMap();
         }
         List<WnwbSynsetRelation> relations = synsetRelationRepository.findAllBySynset(synset);
+        log.info("Found {} relations for synset id {}", relations, id);
         if (relations.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -31,18 +36,21 @@ public class SynsetRelationService {
         if (relTypesBySynsetId.isEmpty()) {
             return Collections.emptyMap();
         }
+        log.info("Found {} related synsets for synset id {}", relTypesBySynsetId, id);
 
         Map<Integer, List<WnwbSense>> sensesBySynsetId = dataFetchService.groupSensesBySynsetId(
             relTypesBySynsetId.keySet()
         );
-        String language = getLanguageFromSenses(sensesBySynsetId);
-        Map<Integer, String> definitionsBySynsetId = dataFetchService.getDefinitionsForSynsets(
-            relTypesBySynsetId.keySet(), language
-        );
+        Map<Integer, String> definitionsBySynsetId = Collections.emptyMap();
+        if (includeDefinitions) {
+            String language = getLanguageFromSenses(sensesBySynsetId);
+            definitionsBySynsetId = dataFetchService.getDefinitionsForSynsets(relTypesBySynsetId.keySet(), language);
+        }
 
         return buildWordWithRelations(relTypesBySynsetId, sensesBySynsetId, definitionsBySynsetId);
     }
 
+    //TODO see on veits bs, kas ei ole alsti est?
     private String getLanguageFromSenses(Map<Integer, List<WnwbSense>> sensesBySynsetId) {
         if (sensesBySynsetId.isEmpty()) {
             return "est";
@@ -66,12 +74,12 @@ public class SynsetRelationService {
         return synsetIdToRelationType;
     }
 
-    private Map<String, List<WordWithDefinitionDto>> buildWordWithRelations(
+    private Map<String, List<WordWithRelationsDto>> buildWordWithRelations(
         Map<Integer, String> relTypesBySynsetId,
         Map<Integer, List<WnwbSense>> sensesBySynsetId,
         Map<Integer, String> definitions
     ) {
-        Map<String, List<WordWithDefinitionDto>> result = new HashMap<>();
+        Map<String, List<WordWithRelationsDto>> result = new HashMap<>();
         for (Map.Entry<Integer, String> entry : relTypesBySynsetId.entrySet()) {
             Integer synsetId = entry.getKey();
             String relationType = entry.getValue();
@@ -80,7 +88,7 @@ public class SynsetRelationService {
                 continue;
             }
 
-            WordWithDefinitionDto dto = createWordDto(senses, definitions);
+            WordWithRelationsDto dto = createWordDto(senses, definitions);
             List<String> relevantWords = new ArrayList<>();
             for (WnwbSense sense : senses) {
                 String lemma = sense.getLexicalEntry().getLemma();
@@ -94,7 +102,7 @@ public class SynsetRelationService {
         return result;
     }
 
-    private WordWithDefinitionDto createWordDto(List<WnwbSense> senses, Map<Integer, String> definitions) {
+    private WordWithRelationsDto createWordDto(List<WnwbSense> senses, Map<Integer, String> definitions) {
         for (WnwbSense sense : senses) {
             String def = definitions.get(sense.getSynset().getId());
             if (def != null) {
@@ -105,8 +113,8 @@ public class SynsetRelationService {
     }
 
     //TODO äkki saaks definitioni mõistlikumalt?
-    private WordWithDefinitionDto buildWordDto(WnwbSense sense, String definition) {
-        WordWithDefinitionDto dto = new WordWithDefinitionDto();
+    private WordWithRelationsDto buildWordDto(WnwbSense sense, String definition) {
+        WordWithRelationsDto dto = new WordWithRelationsDto();
         dto.setId(sense.getId());
         dto.setLemma(sense.getLexicalEntry().getLemma());
         dto.setPartOfSpeech(sense.getLexicalEntry().getPartOfSpeech());
