@@ -116,7 +116,7 @@ SELECT jsonb_pretty(
                         COALESCE(
                             (
                                 SELECT jsonb_agg(
-                                    ext_lex_entry.lemma || ' ' || ext_sense.label
+                                    ext_sense.label
                                 )
                                 FROM wnwb_synset ext_syn
                                     JOIN wnwb_sense ext_sense

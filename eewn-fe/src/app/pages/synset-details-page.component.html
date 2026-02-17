@@ -165,15 +165,15 @@
           <ul>
             @for (extRef of synset.externalReferences; track $index) {
               <li>
-                <b>{{ extRef.systemName }}</b>
+                <div><b>{{ extRef.systemName }} relation(s)</b></div>
                 @if (extRef.relationType) {
-                  <span> relation(s) {{ extRef.relationType }}</span>
+                  <div><span style="font-weight: bold; color: black;">{{ extRef.relationType }}</span></div>
                 }
                 @if (extRef.words && extRef.words.length) {
-                  <span> {{ extRef.words.join(', ') }}</span>
+                  <div>{{ extRef.words.join(', ') }}</div>
                 }
                 @if (extRef.definition) {
-                  <span> {{ extRef.definition }}</span>
+                  <div>{{ extRef.definition }}</div>
                 }
               </li>
             }
