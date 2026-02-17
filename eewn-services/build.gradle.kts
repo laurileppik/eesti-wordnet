@@ -12,4 +12,5 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
 }
