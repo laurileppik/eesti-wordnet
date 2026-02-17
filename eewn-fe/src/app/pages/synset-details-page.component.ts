@@ -3,6 +3,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WordService } from '../services/word.service';
 
+//TODO eraldi meetod?
+export interface Sense {
+  label?: string;
+  lemma?: string;
+  partOfSpeech?: string;
+  status?: string;
+  comment?: string;
+  examples?: string[];
+}
+
 @Component({
   selector: 'app-synset-details-page',
   templateUrl: './synset-details-page.component.html',
@@ -72,31 +82,56 @@ export class SynsetDetailsPageComponent implements OnInit {
     return [];
   }
 
-  get labeledSenseExamples(): { label: string, example: string }[] {
+  //TODO veits hacky aga töötab
+  parseSenseLabel(label: string | undefined): { lemma: string, subscript: string } {
+    if (!label) return { lemma: '', subscript: '' };
+    const match = RegExp(/^(.*?)(_\d+\(.*\))$/).exec(label);
+    if (match) {
+      return { lemma: match[1], subscript: match[2].slice(1) };
+    }
+    return { lemma: label, subscript: '' };
+  }
+
+  get labeledSenseExamples(): { lemma: string, subscript: string, example: string }[] {
     if (!this.synset?.senses) return [];
-    const result: { label: string, example: string }[] = [];
-    for (const sense of this.synset.senses) {
+    const result: { lemma: string, subscript: string, example: string }[] = [];
+    for (const sense of this.synset.senses as Sense[]) {
+      const parsed = this.parseSenseLabel(sense.label);
       if (Array.isArray(sense.examples) && sense.examples.length) {
         for (const ex of sense.examples) {
-          if (typeof ex === 'string') {
-            result.push({ label: sense.label, example: ex });
-          }
+          result.push({
+            lemma: parsed.lemma,
+            subscript: parsed.subscript,
+            example: ex
+          });
         }
       }
     }
     return result;
   }
 
-  senseSubscript(sense: any): string {
-    let senseNumber = '';
-    if (sense.label) {
-      const match = sense.label.match(/_(\d+)\(/);
-      if (match) {
-        senseNumber = ` ${match[1]}`;
-      }
-    }
-    const pos = sense.partOfSpeech ? `(${sense.partOfSpeech})` : '';
-    return `${senseNumber}${pos}`;
+  get formattedSenses(): { lemma: string, subscript: string, partOfSpeech?: string, status?: string, comment?: string }[] {
+    if (!this.synset?.senses) return [];
+    return (this.synset.senses as Sense[]).map(sense => {
+      const parsed = this.parseSenseLabel(sense.label);
+      return {
+        lemma: sense.lemma ?? '',
+        subscript: parsed.subscript,
+        partOfSpeech: sense.partOfSpeech,
+        status: sense.status,
+        comment: sense.comment
+      };
+    });
+  }
+
+  get formattedHeaderSenses(): { lemma: string, subscript: string }[] {
+    if (!this.synset?.senses) return [];
+    return (this.synset.senses as Sense[]).map(sense => this.parseSenseLabel(sense.label));
+  }
+
+  formatWords(words: (string | undefined)[]): { lemma: string, subscript: string }[] {
+    if (!Array.isArray(words)) return [];
+    return words.map(word => this.parseSenseLabel(word));
   }
 
   toggleRelations(): void {
@@ -153,7 +188,7 @@ export class SynsetDetailsPageComponent implements OnInit {
     if (map['has_hypernym']) {
       sections.push({ type: 'has_hypernym', label: this.relationLabel('has_hypernym'), items: map['has_hypernym'] });
     }
-    const otherTypes = Object.keys(map).filter(t => t !== 'has_hyponym' && t !== 'has_hypernym').sort();
+    const otherTypes = Object.keys(map).filter(t => t !== 'has_hyponym' && t !== 'has_hypernym').sort((a, b) => a.localeCompare(b));
     for (const t of otherTypes) {
       sections.push({ type: t, label: this.relationLabel(t), items: map[t] });
     }
@@ -169,7 +204,7 @@ export class SynsetDetailsPageComponent implements OnInit {
       map[t] = map[t] || [];
       map[t].push(r);
     }
-    return Object.keys(map).sort().map(type => ({ type, label: this.relationLabel(type), items: map[type] }));
+    return Object.keys(map).sort((a, b) => a.localeCompare(b)).map(type => ({ type, label: this.relationLabel(type), items: map[type] }));
   }
 
   relationLabel(type: string) {
@@ -177,7 +212,7 @@ export class SynsetDetailsPageComponent implements OnInit {
     // TODO 1 need hardcoded. 2 Siia peaks juurde lisama sense'i, et nt element(1(n)) keemiline element((1n))
     if (type === 'has_hyponym') return 'Hüponüümid';
     if (type === 'has_hypernym') return 'Hüperonüümid';
-    return type.replace(/_/g, ' ');
+    return type.replaceAll('_', ' ');
   }
 
   displayRelevantWords(rel: any): string {
@@ -186,8 +221,16 @@ export class SynsetDetailsPageComponent implements OnInit {
     const mainLabel = rel.relatedLabel ?? String(rel.relatedSynsetId ?? '');
     const mainId = String(rel.relatedSynsetId ?? '');
     const filtered = words
-      .map(w => String(w))
+      .map(String)
       .filter(w => w && w !== String(mainLabel) && w !== mainId);
-    return filtered.length ? filtered.join(', ') : '';
+    //eriti see...
+    return filtered.length
+      ? filtered.map(word => {
+          const parsed = this.parseSenseLabel(word);
+          return parsed.subscript
+            ? `${parsed.lemma}<sub class='sense-subscript'>${parsed.subscript}</sub>`
+            : parsed.lemma;
+        }).join(', ')
+      : '';
   }
 }

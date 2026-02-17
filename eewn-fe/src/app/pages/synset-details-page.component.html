@@ -6,9 +6,9 @@
 }
 @else if (synset) {
   <h2>
-    @if (synset.senses && synset.senses.length > 0) {
-      @for (sense of synset.senses; track sense.id; let isLast = $last) {
-        <span>{{ sense.lemma }}<sub class="sense-subscript">{{ senseSubscript(sense) }}</sub>@if (!isLast) {<span>, </span>}</span>
+    @if (formattedHeaderSenses.length > 0) {
+      @for (sense of formattedHeaderSenses; track $index; let isLast = $last) {
+        <span>{{ sense.lemma }}<sub class="sense-subscript">{{ sense.subscript }}</sub>@if (!isLast) {<span>, </span>}</span>
       }
     } @else {
       {{ synset.label }}
@@ -29,18 +29,18 @@
       <b>Näited:</b>
       <ul>
         @for (item of labeledSenseExamples; track $index) {
-          <li><span class="sense-label">{{ item.label }}:</span> {{ item.example }}</li>
+          <li><span class="sense-label">{{ item.lemma }}<sub class="sense-subscript">{{ item.subscript }}</sub>:</span> {{ item.example }}</li>
         }
       </ul>
     </div>
   }
-  @if (synset.senses.length) {
+  @if (formattedSenses.length) {
     <b>Lemmad:</b>
     <ul>
-      @for (sense of synset.senses; track sense.id) {
+      @for (sense of formattedSenses; track $index) {
         <li>
           {{ sense.lemma }}
-          @if (sense.label) { <span>({{ sense.label }})</span> }
+          @if (sense.subscript) { <span><sub class="sense-subscript">{{ sense.subscript }}</sub></span> }
           @if (sense.partOfSpeech) { <span>({{ sense.partOfSpeech }})</span> }
           @if (sense.status) { <span>[{{ sense.status }}]</span> }
           @if (sense.comment) { <span>- {{ sense.comment }}</span> }
@@ -60,16 +60,7 @@
           <ul>
             @for (rel of hyponyms; track $index) {
               <li>
-                <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)">
-                  @if (rel.relatedLabel) {
-                    {{ rel.relatedLabel }}
-                  } @else {
-                    {{ rel.relatedSynsetId }}
-                  }
-                  @if (displayRelevantWords(rel)) {
-                    <span class="relevant-words">[{{ displayRelevantWords(rel) }}]</span>
-                  }
-                </button>
+                <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)" [innerHTML]="displayRelevantWords(rel)"></button>
               </li>
             }
           </ul>
@@ -89,17 +80,7 @@
           <ul>
             @for (rel of hypernyms; track $index) {
               <li>
-                <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)">
-                  @if (rel.relatedLabel) {
-                    {{ rel.relatedLabel }}
-                  } @else {
-                    {{ rel.relatedSynsetId }}
-                  }
-                  @if (displayRelevantWords(rel)) {
-                    <span class="relevant-words">[{{ displayRelevantWords(rel) }}]</span>
-                  }
-                  @if (rel.definition) { <span> - {{ rel.definition }}</span> }
-                </button>
+                <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)" [innerHTML]="displayRelevantWords(rel)"></button>
               </li>
             }
           </ul>
@@ -119,21 +100,11 @@
           <div class="seosed-groups">
             @for (group of otherRelationSections; track group.type) {
               <div class="relation-group">
-                <b>{{ group.label }}:</b>
+                <b style="font-weight: bold; color: black;"> {{ group.label }}:</b>
                 <ul>
                   @for (rel of group.items; track $index) {
                     <li>
-                      <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)">
-                        @if (rel.relatedLabel) {
-                          {{ rel.relatedLabel }}
-                        } @else {
-                          {{ rel.relatedSynsetId }}
-                        }
-                        @if (displayRelevantWords(rel)) {
-                          <span class="relevant-words">[{{ displayRelevantWords(rel) }}]</span>
-                        }
-                        @if (rel.definition) { <span> - {{ rel.definition }}</span> }
-                      </button>
+                      <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)" [innerHTML]="displayRelevantWords(rel)"></button>
                     </li>
                   }
                 </ul>
@@ -170,7 +141,11 @@
                   <div><span style="font-weight: bold; color: black;">{{ extRef.relationType }}</span></div>
                 }
                 @if (extRef.words && extRef.words.length) {
-                  <div>{{ extRef.words.join(', ') }}</div>
+                  <div>
+                    @for (wordObj of formatWords(extRef.words); track $index) {
+                      <span>{{ wordObj.lemma }}<sub class="sense-subscript">{{ wordObj.subscript }}</sub></span>@if (!$last) {<span>, </span>}
+                    }
+                  </div>
                 }
                 @if (extRef.definition) {
                   <div>{{ extRef.definition }}</div>
