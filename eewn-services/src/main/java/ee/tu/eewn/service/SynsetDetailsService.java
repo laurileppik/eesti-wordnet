@@ -43,7 +43,13 @@ SELECT jsonb_pretty(
                         'partOfSpeech', orig_lex_entry.part_of_speech,
                         'status', orig_sense.status,
                         'comment', orig_sense.comment,
-                        'label', orig_sense.label
+                        'label', orig_sense.label,
+                        'examples', COALESCE((
+                            SELECT jsonb_agg(sense_example.text)
+                            FROM wnwb_senseexample sense_example
+                            WHERE sense_example.sense_id = orig_sense.id
+                              AND sense_example.is_deleted IS FALSE
+                        ), '[]'::jsonb)
                     )
                 )
                 FROM wnwb_sense orig_sense
@@ -65,7 +71,7 @@ SELECT jsonb_pretty(
                         'relevantWords',
                         COALESCE(
                             (
-                                SELECT jsonb_agg(rel_lex_entry.lemma)
+                                SELECT jsonb_agg(rel_sense.label)
                                 FROM wnwb_sense rel_sense
                                     JOIN wnwb_lexicalentry rel_lex_entry
                                         ON rel_lex_entry.id = rel_sense.lexical_entry_id

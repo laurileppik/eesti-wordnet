@@ -24,6 +24,16 @@
       </ul>
     </div>
   }
+  @if (labeledSenseExamples.length) {
+    <div class="examples-block">
+      <b>Näited:</b>
+      <ul>
+        @for (item of labeledSenseExamples; track $index) {
+          <li><span class="sense-label">{{ item.label }}:</span> {{ item.example }}</li>
+        }
+      </ul>
+    </div>
+  }
   @if (synset.senses.length) {
     <b>Lemmad:</b>
     <ul>

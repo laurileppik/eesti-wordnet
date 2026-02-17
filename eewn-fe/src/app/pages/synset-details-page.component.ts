@@ -72,6 +72,21 @@ export class SynsetDetailsPageComponent implements OnInit {
     return [];
   }
 
+  get labeledSenseExamples(): { label: string, example: string }[] {
+    if (!this.synset?.senses) return [];
+    const result: { label: string, example: string }[] = [];
+    for (const sense of this.synset.senses) {
+      if (Array.isArray(sense.examples) && sense.examples.length) {
+        for (const ex of sense.examples) {
+          if (typeof ex === 'string') {
+            result.push({ label: sense.label, example: ex });
+          }
+        }
+      }
+    }
+    return result;
+  }
+
   senseSubscript(sense: any): string {
     let senseNumber = '';
     if (sense.label) {
