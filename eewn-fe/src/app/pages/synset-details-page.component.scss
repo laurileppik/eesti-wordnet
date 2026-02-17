@@ -79,54 +79,94 @@ li:last-child {
   outline-offset: 2px;
 }
 
-.relevant-words {
-  color: #6c757d;
-  font-size: 0.9rem;
-  font-style: italic;
-  margin-left: 0.25rem;
-}
-
-span {
-  color: #000000;
-}
-
 .toggleable-section {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  background: linear-gradient(180deg, #fafdff 80%, #f3f6fa 100%);
+  transition: box-shadow 0.25s, background 0.25s;
+  overflow: hidden;
 }
 
 .toggle-header {
-  cursor: pointer;
-  user-select: none;
-  display: inline-flex;
+  width: 100%;
+  display: flex;
   align-items: center;
-  transition: color 0.2s ease;
-  border-radius: 4px;
-  padding: 0.25rem;
-  margin: -0.25rem;
+  font-size: 1.13rem;
+  font-weight: 600;
   background: none;
   border: none;
-  color: #0056b3;
-  font-weight: 600;
-  font-size: 1.05rem;
-  font-family: inherit;
-  text-align: left;
+  outline: none;
+  cursor: pointer;
+  padding: 1.1rem 1.7rem 1.1rem 1.5rem;
+  border-radius: 12px 12px 0 0;
+  transition: background 0.2s, color 0.2s;
+  color: #181818;
+  box-shadow: none;
+  letter-spacing: 0.01em;
 
-  &:hover {
-    color: #007bff;
-  }
-
-  &:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-    color: #007bff;
+  &:hover, &:focus {
+    background: #e9f2fb;
+    color: #181818;
   }
 }
 
 .toggle-icon {
-  display: inline-block;
-  margin-right: 0.5rem;
-  font-size: 0.8em;
-  transition: transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.8em;
+  font-size: 1.35em;
+  font-weight: bold;
+  color: #222;
+  background: #e3eaf3;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), background 0.2s;
+
+  .toggle-header:hover &,
+  .toggle-header:focus & {
+    background: #d0e2fa;
+  }
+}
+
+.toggle-content {
+  overflow: hidden;
+  background: #f8fafd;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.04);
+  transition: box-shadow 0.2s, background 0.2s;
+  animation: dropdown-fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.seosed-groups {
+  padding: 0.5rem 1.5rem 1rem 1.5rem;
+}
+
+.relation-group {
+  margin-bottom: 1rem;
+}
+
+.relevant-words {
+  color: #888;
+  font-size: 0.95em;
+  margin-left: 0.5em;
+}
+
+span {
+  color: #000000;
 }
 
 div:first-child {
