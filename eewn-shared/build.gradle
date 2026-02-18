@@ -1,0 +1,76 @@
+import nu.studer.gradle.jooq.JooqEdition
+import org.jooq.meta.jaxb.Database
+import org.jooq.meta.jaxb.ForcedType
+import org.jooq.meta.jaxb.Generate
+import org.jooq.meta.jaxb.Generator
+import org.jooq.meta.jaxb.Jdbc
+import org.jooq.meta.jaxb.Strategy
+import org.jooq.meta.jaxb.Target
+
+// https://stackoverflow.com/questions/76542793/error-in-jooq-codegen-after-upgrading-to-3-18
+buildscript {
+    configurations['classpath'].resolutionStrategy.eachDependency {
+        if (requested.group == 'org.jooq') {
+            // set jOOQ version used at configuration time to enforce a specific jOOQ config XML schema version
+            useVersion '3.19.29'
+        }
+    }
+}
+
+plugins {
+    id 'nu.studer.jooq' version '10.2'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    jooqGenerator 'org.postgresql:postgresql:42.7.3'
+}
+
+//Siin olevad näited 1-1le ei töötanud, pidi teistmoodi kirjutama. Kotlinis ei saanud üldse tööle
+//https://github.com/etiennestuder/gradle-jooq-plugin
+// Kasutatud ./gradlew generateJooq käsku, et JOOQ klassid genereerida.
+jooq {
+    version = '3.19.29'
+    edition = JooqEdition.OSS
+    configurations {
+        main {
+            jooqConfiguration {
+                logging = org.jooq.meta.jaxb.Logging.WARN
+
+                jdbc = new Jdbc()
+                jdbc.driver = 'org.postgresql.Driver'
+                jdbc.url = 'jdbc:postgresql://localhost:5432/LOCAL-wndb'
+                jdbc.user = 'postgres'
+                jdbc.password = '1234'
+                jdbc.properties = [
+                    new org.jooq.meta.jaxb.Property().withKey('PAGE_SIZE').withValue('2048')
+                ]
+
+                generator = new Generator()
+                generator.name = 'org.jooq.codegen.DefaultGenerator'
+                generator.database = new Database()
+                generator.database.name = 'org.jooq.meta.postgres.PostgresDatabase'
+                generator.database.inputSchema = 'public'
+                //generator.database.forcedTypes = [
+                //    new ForcedType().withName('varchar').withIncludeExpression('.*').withIncludeTypes('JSONB?'),
+                //    new ForcedType().withName('varchar').withIncludeExpression('.*').withIncludeTypes('INET')
+                //]
+                generator.generate = new Generate()
+                generator.generate.deprecated = false
+                generator.generate.records = true
+                generator.generate.immutablePojos = true
+                generator.generate.fluentSetters = true
+
+                generator.target = new Target()
+                generator.target.packageName = 'nu.studer.sample'
+                generator.target.directory = "${projectDir}/build/generated-src/jooq/main"
+                generator.strategy = new Strategy()
+                generator.strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+            }
+        }
+    }
+}

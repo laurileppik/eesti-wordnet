@@ -26,7 +26,7 @@ public class WordService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         searchCache = Caffeine.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .expireAfterWrite(60, TimeUnit.MINUTES)
                 .maximumSize(1000)
                 .build();
     }

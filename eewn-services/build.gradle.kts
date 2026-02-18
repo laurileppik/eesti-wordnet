@@ -7,10 +7,16 @@ plugins {
 dependencies {
     implementation(project(":eewn-db"))
     implementation(project(":eewn-model"))
+    implementation(project(":eewn-shared"))
 
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("org.jooq:jooq:3.19.29")
+    implementation("org.jooq:jooq-meta:3.19.29")
+    implementation("org.jooq:jooq-codegen:3.19.29")
+    implementation("org.jooq:jooq-postgres-extensions:3.19.29")
+    implementation("org.springframework.boot:spring-boot-starter-jooq")
 }

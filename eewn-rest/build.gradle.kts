@@ -26,6 +26,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+    mainClass.set("ee.tu.eewn.EestiWordnetRestApplication")
+}
+
 tasks.test {
     useJUnitPlatform()
 }

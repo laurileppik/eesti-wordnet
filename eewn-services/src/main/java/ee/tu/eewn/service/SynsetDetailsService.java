@@ -1,168 +1,226 @@
 package ee.tu.eewn.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.jooq.*;
+import org.jooq.conf.ParamType;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import jakarta.persistence.NoResultException;
+import static org.jooq.impl.DSL.*;
+import static nu.studer.sample.tables.WnwbSynset.WNWB_SYNSET;
+import static nu.studer.sample.tables.WnwbDefinition.WNWB_DEFINITION;
+import static nu.studer.sample.tables.WnwbSense.WNWB_SENSE;
+import static nu.studer.sample.tables.WnwbLexicalentry.WNWB_LEXICALENTRY;
+import static nu.studer.sample.tables.WnwbSenseexample.WNWB_SENSEEXAMPLE;
+import static nu.studer.sample.tables.WnwbSynsetrelation.WNWB_SYNSETRELATION;
+import static nu.studer.sample.tables.WnwbSynsetrelationtype.WNWB_SYNSETRELATIONTYPE;
+import static nu.studer.sample.tables.WnwbSynsettag.WNWB_SYNSETTAG;
+import static nu.studer.sample.tables.WnwbTag.WNWB_TAG;
+import static nu.studer.sample.tables.WnwbExternalref.WNWB_EXTERNALREF;
+import static nu.studer.sample.tables.WnwbExternalsystem.WNWB_EXTERNALSYSTEM;
+import static nu.studer.sample.tables.WnwbExternalrelationtype.WNWB_EXTERNALRELATIONTYPE;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SynsetDetailsService {
-    @PersistenceContext
-    private EntityManager em;
+    private final DSLContext dsl;
 
     public String getSynsetDetails(Integer id) {
-        String sql =
-"""
-SELECT jsonb_pretty(
-    jsonb_build_object(
-        'id', orig_syn.id,
-        'label', orig_syn.label,
-        'synsetType', orig_syn.synset_type,
-        'status', orig_syn.status,
-        'comment', orig_syn.comment,
-        'definitions',
-        COALESCE(
-            (
-                SELECT jsonb_agg(orig_syn_def.text)
-                FROM wnwb_definition orig_syn_def
-                WHERE orig_syn_def.synset_id = orig_syn.id
-                  AND orig_syn_def.is_deleted IS FALSE
-            ), '[]'::jsonb
-        ),
-        'senses',
-        COALESCE(
-            (
-                SELECT jsonb_agg(
-                    jsonb_build_object(
-                        'id', orig_sense.id,
-                        'lemma', orig_lex_entry.lemma,
-                        'partOfSpeech', orig_lex_entry.part_of_speech,
-                        'status', orig_sense.status,
-                        'comment', orig_sense.comment,
-                        'label', orig_sense.label,
-                        'examples', COALESCE((
-                            SELECT jsonb_agg(sense_example.text)
-                            FROM wnwb_senseexample sense_example
-                            WHERE sense_example.sense_id = orig_sense.id
-                              AND sense_example.is_deleted IS FALSE
-                        ), '[]'::jsonb)
-                    )
-                )
-                FROM wnwb_sense orig_sense
-                    JOIN wnwb_lexicalentry orig_lex_entry
-                        ON orig_lex_entry.id = orig_sense.lexical_entry_id
-                        AND orig_lex_entry.is_deleted IS FALSE
-                WHERE orig_sense.synset_id = orig_syn.id
-                  AND orig_sense.is_deleted IS FALSE
-            ), '[]'::jsonb
-        ),
-        'relations',
-        COALESCE(
-            (
-                SELECT jsonb_agg(
-                    jsonb_build_object(
-                        'type', syn_rel_type.name,
-                        'relatedSynsetId', rel_syn.id,
-                        'relatedLabel', rel_syn.label,
-                        'relevantWords',
-                        COALESCE(
-                            (
-                                SELECT jsonb_agg(rel_sense.label)
-                                FROM wnwb_sense rel_sense
-                                    JOIN wnwb_lexicalentry rel_lex_entry
-                                        ON rel_lex_entry.id = rel_sense.lexical_entry_id
-                                        AND rel_lex_entry.is_deleted IS FALSE
-                                WHERE rel_sense.synset_id = rel_syn.id
-                                  AND rel_sense.is_deleted IS FALSE
-                            ), '[]'::jsonb
+        var origSyn = WNWB_SYNSET.as("orig_syn");
+        var origSynDef = WNWB_DEFINITION.as("orig_syn_def");
+        var origSense = WNWB_SENSE.as("orig_sense");
+        var origLex = WNWB_LEXICALENTRY.as("orig_lex_entry");
+        var origSynTag = WNWB_SYNSETTAG.as("orig_syn_tag");
+        var origTag = WNWB_TAG.as("orig_tag");
+        var senseExample = WNWB_SENSEEXAMPLE.as("sense_example");
+
+        var synRel = WNWB_SYNSETRELATION.as("syn_rel");
+        var synRelType = WNWB_SYNSETRELATIONTYPE.as("syn_rel_type");
+        var relSyn = WNWB_SYNSET.as("rel_syn");
+        var relSense = WNWB_SENSE.as("rel_sense");
+        var relLex = WNWB_LEXICALENTRY.as("rel_lex_entry");
+
+        var extRef = WNWB_EXTERNALREF.as("ext_ref");
+        var extSys = WNWB_EXTERNALSYSTEM.as("ext_sys");
+        var extRelType = WNWB_EXTERNALRELATIONTYPE.as("ext_rel_type");
+        var extSyn = WNWB_SYNSET.as("ext_syn");
+        var extSense = WNWB_SENSE.as("ext_sense");
+        var extLex = WNWB_LEXICALENTRY.as("ext_lex_entry");
+        var extDef = WNWB_DEFINITION.as("ext_def");
+        Field<JSONB> emptyJsonArray = cast(inline("[]"), JSONB.class);
+
+        Field<JSONB> definitions =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(origSynDef.TEXT))
+                        .from(origSynDef)
+                        .where(origSynDef.SYNSET_ID.eq(origSyn.ID))
+                        .and(origSynDef.IS_DELETED.isFalse())
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> examples =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(senseExample.TEXT))
+                        .from(senseExample)
+                        .where(senseExample.SENSE_ID.eq(origSense.ID))
+                        .and(senseExample.IS_DELETED.isFalse())
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> senses =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(
+                        jsonbObject(
+                            key("id").value(origSense.ID),
+                            key("lemma").value(origLex.LEMMA),
+                            key("partOfSpeech").value(origLex.PART_OF_SPEECH),
+                            key("status").value(origSense.STATUS),
+                            key("comment").value(origSense.COMMENT),
+                            key("label").value(origSense.LABEL),
+                            key("examples").value(examples)
                         )
-                    )
-                )
-                FROM wnwb_synsetrelation syn_rel
-                    JOIN wnwb_synsetrelationtype syn_rel_type
-                        ON syn_rel_type.id = syn_rel.rel_type_id
-                        AND syn_rel_type.is_deleted IS FALSE
-                    JOIN wnwb_synset rel_syn
-                        ON rel_syn.id = syn_rel.b_synset_id
-                WHERE syn_rel.a_synset_id = orig_syn.id
-                  AND syn_rel.is_deleted IS FALSE
-            ), '[]'::jsonb
-        ),
-        'tags',
-        COALESCE(
-            (
-                SELECT jsonb_agg(orig_tag.value)
-                FROM wnwb_synsettag orig_syn_tag
-                    JOIN wnwb_tag orig_tag
-                        ON orig_tag.id = orig_syn_tag.tag_id
-                        AND orig_tag.is_deleted IS FALSE
-                WHERE orig_syn_tag.synset_id = orig_syn.id
-                  AND orig_syn_tag.is_deleted IS FALSE
-            ), '[]'::jsonb
-        ),
-        'externalReferences',
-        COALESCE(
-            (
-                SELECT jsonb_agg(
-                    jsonb_build_object(
-                        'systemName', ext_sys.name,
-                        'relationType', ext_rel_type.name,
-                        'reference', ext_ref.reference,
-                        'words',
-                        COALESCE(
-                            (
-                                SELECT jsonb_agg(
-                                    ext_sense.label
-                                )
-                                FROM wnwb_synset ext_syn
-                                    JOIN wnwb_sense ext_sense
-                                        ON ext_sense.synset_id = ext_syn.id
-                                        AND ext_sense.is_deleted IS FALSE
-                                    JOIN wnwb_lexicalentry ext_lex_entry
-                                        ON ext_lex_entry.id = ext_sense.lexical_entry_id
-                                        AND ext_lex_entry.is_deleted IS FALSE
-                                WHERE ext_syn.label = ext_ref.reference
-                            ), '[]'::jsonb
-                        ),
-                        'definition',
-                        (
-                            SELECT ext_def.text
-                            FROM wnwb_synset ext_syn
-                                JOIN wnwb_definition ext_def
-                                    ON ext_def.synset_id = ext_syn.id
-                                    AND ext_def.is_deleted IS FALSE
-                            WHERE ext_syn.label = ext_ref.reference
-                            LIMIT 1
+                    ))
+                        .from(origSense)
+                        .join(origLex)
+                        .on(origLex.ID.eq(origSense.LEXICAL_ENTRY_ID))
+                        .and(origLex.IS_DELETED.isFalse())
+                        .where(origSense.SYNSET_ID.eq(origSyn.ID))
+                        .and(origSense.IS_DELETED.isFalse())
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> relevantWords =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(relSense.LABEL))
+                        .from(relSense)
+                        .join(relLex)
+                        .on(relLex.ID.eq(relSense.LEXICAL_ENTRY_ID))
+                        .and(relLex.IS_DELETED.isFalse())
+                        .where(relSense.SYNSET_ID.eq(relSyn.ID))
+                        .and(relSense.IS_DELETED.isFalse())
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> relations =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(
+                        jsonbObject(
+                            key("type").value(synRelType.NAME),
+                            key("relatedSynsetId").value(relSyn.ID),
+                            key("relatedLabel").value(relSyn.LABEL),
+                            key("relevantWords").value(relevantWords)
                         )
-                    )
-                )
-                FROM wnwb_externalref ext_ref
-                    JOIN wnwb_externalsystem ext_sys
-                        ON ext_sys.id = ext_ref.sys_id_id
-                    JOIN wnwb_externalrelationtype ext_rel_type
-                        ON ext_rel_type.id = ext_ref.rel_type_id
-                WHERE ext_ref.synset_id = orig_syn.id
-            ), '[]'::jsonb
-        )
-    )
-) AS pretty_json
-FROM wnwb_synset orig_syn
-WHERE orig_syn.id = ?1
-  AND orig_syn.is_deleted IS FALSE;
-""";
-        Query q = em.createNativeQuery(sql);
-        q.setParameter(1, id);
-        Object res;
-        try {
-            res = q.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-        if (res == null) return null;
-        return res.toString();
+                    ))
+                        .from(synRel)
+                        .join(synRelType)
+                        .on(synRelType.ID.eq(synRel.REL_TYPE_ID))
+                        .and(synRelType.IS_DELETED.isFalse())
+                        .join(relSyn)
+                        .on(relSyn.ID.eq(synRel.B_SYNSET_ID))
+                        .where(synRel.A_SYNSET_ID.eq(origSyn.ID))
+                        .and(synRel.IS_DELETED.isFalse())
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> tags =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(origTag.VALUE))
+                        .from(origSynTag)
+                        .join(origTag)
+                        .on(origTag.ID.eq(origSynTag.TAG_ID))
+                        .and(origTag.IS_DELETED.isFalse())
+                        .where(origSynTag.SYNSET_ID.eq(origSyn.ID))
+                        .and(origSynTag.IS_DELETED.isFalse())
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> extWords =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(extSense.LABEL))
+                        .from(extSyn)
+                        .join(extSense)
+                        .on(extSense.SYNSET_ID.eq(extSyn.ID))
+                        .and(extSense.IS_DELETED.isFalse())
+                        .join(extLex)
+                        .on(extLex.ID.eq(extSense.LEXICAL_ENTRY_ID))
+                        .and(extLex.IS_DELETED.isFalse())
+                        .where(extSyn.LABEL.eq(extRef.REFERENCE))
+                ),
+                emptyJsonArray
+            );
+
+        Field<String> extDefinition =
+            field(
+                select(extDef.TEXT)
+                    .from(extSyn)
+                    .join(extDef)
+                    .on(extDef.SYNSET_ID.eq(extSyn.ID))
+                    .and(extDef.IS_DELETED.isFalse())
+                    .where(extSyn.LABEL.eq(extRef.REFERENCE))
+                    .limit(1)
+            );
+
+        Field<JSONB> externalReferences =
+            coalesce(
+                field(
+                    select(jsonbArrayAgg(
+                        jsonbObject(
+                            key("systemName").value(extSys.NAME),
+                            key("relationType").value(extRelType.NAME),
+                            key("reference").value(extRef.REFERENCE),
+                            key("words").value(extWords),
+                            key("definition").value(extDefinition)
+                        )
+                    ))
+                        .from(extRef)
+                        .join(extSys)
+                        .on(extSys.ID.eq(extRef.SYS_ID_ID))
+                        .join(extRelType)
+                        .on(extRelType.ID.eq(extRef.REL_TYPE_ID))
+                        .where(extRef.SYNSET_ID.eq(origSyn.ID))
+                ),
+                emptyJsonArray
+            );
+
+        Field<JSONB> json =
+            jsonbObject(
+                key("id").value(origSyn.ID),
+                key("label").value(origSyn.LABEL),
+                key("synsetType").value(origSyn.SYNSET_TYPE),
+                key("status").value(origSyn.STATUS),
+                key("comment").value(origSyn.COMMENT),
+                key("definitions").value(definitions),
+                key("senses").value(senses),
+                key("relations").value(relations),
+                key("tags").value(tags),
+                key("externalReferences").value(externalReferences)
+            );
+
+        Field<JSONB> pretty =
+            DSL.function("jsonb_pretty", JSONB.class, json);
+        SelectConditionStep<Record1<JSONB>> query = dsl
+            .select(pretty)
+            .from(origSyn)
+            .where(origSyn.ID.eq(id))
+            .and(origSyn.IS_DELETED.isFalse());
+        log.info("[jOOQ SQL] {}", query.getSQL());
+        log.info("[jOOQ INLINED SQL] {}", query.getSQL(ParamType.INLINED));
+        return query.fetchOneInto(String.class);
     }
 }
