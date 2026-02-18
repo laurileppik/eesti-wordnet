@@ -16,7 +16,7 @@
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onAutocompleteSelect($event)">
       @for (option of filteredOptions; track option.id) {
         <mat-option [value]="option.lemma">
-          {{ option.lemma }}
+          <span style="font-weight:500; ">{{ option.lemma }}</span>
         </mat-option>
       }
     </mat-autocomplete>

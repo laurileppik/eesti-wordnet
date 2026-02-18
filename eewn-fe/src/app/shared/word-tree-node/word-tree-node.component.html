@@ -1,21 +1,18 @@
 <div class="word-tree-node">
-  <div class="word-header" (click)="toggleExpand()" style="cursor:pointer;" tabindex="0" (keydown.enter)="toggleExpand()">
+  <div class="word-header" (click)="toggleExpand()" role="button" [attr.tabindex]="0" (keydown.enter)="toggleExpand()">
     @if (relationType) {
       <span><strong>{{ relationType }}:</strong> </span>
     }
-    <span>{{ word.label ? word.label : word.lemma }} ({{ word.partOfSpeech }})</span>
+    <span>{{ word.label ? word.label : word.lemma }} <span style="color:#1976d2; font-weight:500;">({{ word.partOfSpeech }})</span></span>
     @if (relevantWords.length > 0) {
       <span style="color: #888; font-size: 0.95em;"> [{{ relevantWords.join(', ') }}]</span>
     }
     @if (word.definition) {
-      <span> - {{ word.definition }}</span>
+      <span style="color:#444;"> - {{ word.definition }}</span>
     }
-    @if (!expanded) {
-      <span> [+]</span>
-    }
-    @if (expanded) {
-      <span> [-]</span>
-    }
+    <span class="expand-icon" [attr.aria-label]="expanded ? 'Sulge' : 'Ava'">
+      <mat-icon class="expand-icon-inner">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </span>
   </div>
   <button class="details-btn" [routerLink]="['/synsets', word.synsetId]" *ngIf="word.synsetId">
     Üksikasjad

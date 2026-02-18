@@ -1,12 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { WordService, WordWithDefinitionDto } from '../../services/word.service';
 
 @Component({
   selector: 'app-word-tree-node',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatIconModule],
   templateUrl: './word-tree-node.component.html',
   styleUrl: './word-tree-node.component.scss',
 })
