@@ -4,6 +4,14 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 //TODO DTO-de jaoks eraldi failid ja kaust
+export interface ExternalReferenceDto {
+  systemName: string;
+  relationType: string;
+  reference: string;
+  words: string[];
+  definition: string;
+}
+
 export interface WordWithDefinitionDto {
   id: number;
   lemma: string;
@@ -12,6 +20,7 @@ export interface WordWithDefinitionDto {
   label?: string;
   synsetId?: number;
   relevantWords?: string[];
+  externalReferences?: ExternalReferenceDto[];
 }
 
 export interface AutocompleteWordDto {

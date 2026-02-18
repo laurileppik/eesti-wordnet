@@ -1,6 +1,7 @@
 package ee.tu.eewn.service;
 
 
+import ee.tu.eewn.dto.ExternalReferenceDto;
 import ee.tu.eewn.dto.WordWithRelationsDto;
 import ee.tu.eewn.dto.AutocompleteWordDto;
 import ee.tu.eewn.repository.WordRepository;
@@ -21,6 +22,7 @@ public class WordService implements InitializingBean {
     private final WordRepository wordRepository;
     private final SenseRepository senseRepository;
     private final DataFetchService dataFetchService;
+    private final ExternalReferenceService externalReferenceService;
     private Cache<String, List<WordWithRelationsDto>> searchCache;
 
     @Override
@@ -45,6 +47,9 @@ public class WordService implements InitializingBean {
                     if (sense.getSynset() != null) {
                         dto.setSynsetId(sense.getSynset().getId());
                         dto.setRelevantWords(dataFetchService.getLemmasForSynset(sense.getSynset().getId()));
+                        List<ExternalReferenceDto> externalRefs = externalReferenceService.getExternalReferences(sense.getSynset());
+                        dto.setExternalReferences(externalRefs);
+
                     } else {
                         dto.setRelevantWords(List.of());
                     }

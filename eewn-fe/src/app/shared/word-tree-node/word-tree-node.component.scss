@@ -58,3 +58,26 @@
 .details-btn:active {
   background: #0d47a1;
 }
+.external-reference-container {
+  background: #f2f2f2;
+  border-radius: 4px;
+  padding: 0.5em 0.8em;
+  margin: 0.5em 0 0.5em 0;
+  font-size: 0.97em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5em;
+}
+.external-reference-words {
+  font-weight: 500;
+  margin-right: 0.5em;
+}
+.external-reference-definition {
+  color: #444;
+  margin-right: 0.5em;
+}
+.external-reference-system {
+  color: #888;
+  font-size: 0.95em;
+}

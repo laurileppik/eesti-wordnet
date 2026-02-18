@@ -18,4 +18,5 @@ public class WordWithRelationsDto {
     private String label;
     private Integer synsetId;
     private List<String> relevantWords;
+    private List<ExternalReferenceDto> externalReferences;
 }

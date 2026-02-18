@@ -20,6 +20,19 @@
   <button class="details-btn" [routerLink]="['/synsets', word.synsetId]" *ngIf="word.synsetId">
     Üksikasjad
   </button>
+  @if (externalReferences) {
+    <div class="external-reference-container">
+      <span class="external-reference-words">
+        {{ externalReferenceWords }}
+      </span>
+      <span class="external-reference-definition">
+        {{ externalReferences.definition }}
+      </span>
+      <span class="external-reference-system">
+        -- ({{ externalReferences.systemName }})
+      </span>
+    </div>
+  }
   @if (expanded) {
     <div class="word-children" style="margin-left: 0.3em;">
       @if (loading) {

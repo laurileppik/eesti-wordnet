@@ -137,4 +137,34 @@ public class ExternalReferenceService {
         String definition = definitionsBySynsetId.get(synset.getId());
         return definition != null ? definition : "";
     }
+
+    public Map<Integer, List<ExternalReferenceDto>> getExternalReferencesForSynsets(Collection<WnwbSynset> synsets) {
+        if (synsets == null || synsets.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<WnwbExternalref> externalRefs = externalrefRepository.findBySynsetIn(synsets);
+        Map<Integer, List<WnwbExternalref>> refsBySynsetId = new HashMap<>();
+        Set<String> allReferences = new HashSet<>();
+        for (WnwbExternalref ref : externalRefs) {
+            if (ref.getSynset() != null) {
+                refsBySynsetId.computeIfAbsent(ref.getSynset().getId(), k -> new ArrayList<>()).add(ref);
+            }
+            if (ref.getReference() != null && !ref.getReference().isBlank()) {
+                allReferences.add(ref.getReference());
+            }
+        }
+        Map<String, WnwbSynset> synsetsByLabel = findExternalSynsets(allReferences);
+        Set<Integer> extSynsetIds = new HashSet<>();
+        for (WnwbSynset s : synsetsByLabel.values()) {
+            extSynsetIds.add(s.getId());
+        }
+        Map<Integer, List<WnwbSense>> sensesBySynsetId = dataFetchService.groupSensesBySynsetId(extSynsetIds);
+        Map<Integer, String> definitionsBySynsetId = dataFetchService.getDefinitionsForSynsets(extSynsetIds, "eng");
+        Map<Integer, List<ExternalReferenceDto>> result = new HashMap<>();
+        for (Map.Entry<Integer, List<WnwbExternalref>> entry : refsBySynsetId.entrySet()) {
+            List<ExternalReferenceDto> dtos = buildExternalReferences(entry.getValue(), synsetsByLabel, sensesBySynsetId, definitionsBySynsetId);
+            result.put(entry.getKey(), dtos);
+        }
+        return result;
+    }
 }

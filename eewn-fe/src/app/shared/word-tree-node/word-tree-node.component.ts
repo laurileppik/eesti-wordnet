@@ -18,12 +18,16 @@ export class WordTreeNodeComponent implements OnInit {
   loading = false;
   relations: { [type: string]: WordWithDefinitionDto[] } = {};
   relevantWords: string[] = [];
+  externalReferences: any = null;
 
   constructor(private readonly wordService: WordService) {}
 
   ngOnInit() {
     if (this.word?.relevantWords) {
       this.relevantWords = this.word.relevantWords.filter(w => w !== this.word.lemma);
+    }
+    if (this.word?.externalReferences && Array.isArray(this.word.externalReferences)) {
+      this.externalReferences = this.word.externalReferences.find((ref: any) => ref.definition && ref.definition.trim() !== '');
     }
   }
 
@@ -39,4 +43,13 @@ export class WordTreeNodeComponent implements OnInit {
   }
 
   objectKeys = Object.keys;
+
+  get externalReferenceWords(): string {
+    if (this.externalReferences?.words) {
+      return this.externalReferences.words
+                 .map((w: string) => w.trim())
+                 .join(', ');
+    }
+    return '';
+  }
 }
