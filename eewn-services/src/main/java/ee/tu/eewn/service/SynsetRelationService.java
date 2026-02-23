@@ -1,5 +1,6 @@
 package ee.tu.eewn.service;
 
+import ee.tu.eewn.dto.SynsetRelationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,10 @@ import static nu.studer.sample.tables.WnwbExternalsystem.WNWB_EXTERNALSYSTEM;
 import static nu.studer.sample.tables.WnwbExternalrelationtype.WNWB_EXTERNALRELATIONTYPE;
 import static nu.studer.sample.tables.WnwbSynsetrelationtype.WNWB_SYNSETRELATIONTYPE;
 import static nu.studer.sample.tables.WnwbSynsetrelation.WNWB_SYNSETRELATION;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +29,7 @@ public class SynsetRelationService {
     private final DSLContext dsl;
     private final ExternalReferenceService externalReferenceService;
 
-    public String getRelationsJsonJooq(Integer synsetId) {
+    public Map<String, List<SynsetRelationDto>> getRelationsJsonJooq(Integer synsetId) {
         var origSyn = WNWB_SYNSET.as("orig_syn");
         var origSynDef = WNWB_DEFINITION.as("orig_syn_def");
         var origSense = WNWB_SENSE.as("orig_sense");
@@ -104,10 +109,25 @@ public class SynsetRelationService {
                 emptyJsonArray
             );
 
-        return dsl.select(relations)
-                  .from(origSyn)
-                  .where(origSyn.ID.eq(synsetId))
-                  .and(origSyn.IS_DELETED.isFalse())
-                  .fetchOneInto(String.class);
+        var synsetRelationRecord = dsl.select(relations)
+            .from(origSyn)
+            .where(origSyn.ID.eq(synsetId))
+            .and(origSyn.IS_DELETED.isFalse())
+            .fetchOne();
+        if (synsetRelationRecord == null) return Map.of();
+        JSONB jsonb = synsetRelationRecord.get(relations);
+        log.debug("[JSONB DATA] {}", jsonb != null ? jsonb.data() : "null");
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            TypeReference<Map<String, List<SynsetRelationDto>>> typeRef = new TypeReference<>() {};
+            if (jsonb == null) {
+                log.warn("[RELATIONS MAPPING WARNING] JSONB data is null for synsetId {}", synsetId);
+                return Map.of();
+            }
+            return mapper.readValue(jsonb.data(), typeRef);
+        } catch (Exception e) {
+            log.error("[RELATIONS MAPPING ERROR] {}", e.getMessage());
+            return Map.of();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ee.tu.eewn.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,4 +15,5 @@ public class SenseDto {
     private String status;
     private String comment;
     private String label;
+    private List<String> examples;
 }

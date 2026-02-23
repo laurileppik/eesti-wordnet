@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.jooq.*;
-import org.jooq.conf.ParamType;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
 import static org.jooq.impl.DSL.*;
@@ -21,6 +19,14 @@ import static nu.studer.sample.tables.WnwbTag.WNWB_TAG;
 import static nu.studer.sample.tables.WnwbExternalref.WNWB_EXTERNALREF;
 import static nu.studer.sample.tables.WnwbExternalsystem.WNWB_EXTERNALSYSTEM;
 import static nu.studer.sample.tables.WnwbExternalrelationtype.WNWB_EXTERNALRELATIONTYPE;
+import ee.tu.eewn.dto.SynsetDetailsDto;
+import ee.tu.eewn.dto.SenseDto;
+import ee.tu.eewn.dto.SynsetRelationForDetailsDto;
+import ee.tu.eewn.dto.TagDto;
+import ee.tu.eewn.dto.ExternalReferenceDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -29,7 +35,7 @@ public class SynsetDetailsService {
     private final DSLContext dsl;
     private final ExternalReferenceService externalReferenceService;
 
-    public String getSynsetDetails(Integer id) {
+    public SynsetDetailsDto getSynsetDetails(Integer id) {
         var origSyn = WNWB_SYNSET.as("orig_syn");
         var origSynDef = WNWB_DEFINITION.as("orig_syn_def");
         var origSense = WNWB_SENSE.as("orig_sense");
@@ -150,29 +156,65 @@ public class SynsetDetailsService {
 
         Field<JSONB> externalReferences = externalReferenceService.getExternalReferences(origSense, extSyn, origLex, extRef, emptyJsonArray, extDef, extSys, extRelType, origSyn);
 
-        Field<JSONB> json =
-            jsonbObject(
-                key("id").value(origSyn.ID),
-                key("label").value(origSyn.LABEL),
-                key("synsetType").value(origSyn.SYNSET_TYPE),
-                key("status").value(origSyn.STATUS),
-                key("comment").value(origSyn.COMMENT),
-                key("definitions").value(definitions),
-                key("senses").value(senses),
-                key("relations").value(relations),
-                key("tags").value(tags),
-                key("externalReferences").value(externalReferences)
-            );
-
-        Field<JSONB> pretty =
-            DSL.function("jsonb_pretty", JSONB.class, json);
-        SelectConditionStep<Record1<JSONB>> query = dsl
-            .select(pretty)
+        var synsetDetailsRecord = dsl.select(
+                origSyn.ID,
+                origSyn.LABEL,
+                origSyn.SYNSET_TYPE,
+                origSyn.STATUS,
+                origSyn.COMMENT,
+                definitions,
+                senses,
+                relations,
+                tags,
+                externalReferences
+            )
             .from(origSyn)
             .where(origSyn.ID.eq(id))
-            .and(origSyn.IS_DELETED.isFalse());
-        log.info("[jOOQ SQL] {}", query.getSQL());
-        log.info("[jOOQ INLINED SQL] {}", query.getSQL(ParamType.INLINED));
-        return query.fetchOneInto(String.class);
+            .and(origSyn.IS_DELETED.isFalse())
+            .fetchOne();
+
+        if (synsetDetailsRecord == null) return null;
+
+        SynsetDetailsDto dto = new SynsetDetailsDto();
+        dto.setId(synsetDetailsRecord.get(origSyn.ID));
+        dto.setLabel(synsetDetailsRecord.get(origSyn.LABEL));
+        dto.setSynsetType(synsetDetailsRecord.get(origSyn.SYNSET_TYPE));
+        dto.setStatus(synsetDetailsRecord.get(origSyn.STATUS));
+        dto.setComment(synsetDetailsRecord.get(origSyn.COMMENT));
+        dto.setDefinitions(jsonbToStringList(synsetDetailsRecord.get(definitions)));
+        JSONB sensesJson = synsetDetailsRecord.get(senses);
+        dto.setSenses(jsonbToSenseDtoList(sensesJson));
+        dto.setRelations(jsonbToSynsetRelationDtoList(synsetDetailsRecord.get(relations)));
+        dto.setTags(jsonbToStringList(synsetDetailsRecord.get(tags)));
+        dto.setExternalReferences(jsonbToExternalReferenceList(synsetDetailsRecord.get(externalReferences)));
+        log.debug("[SYNSET DETAILS] {}", dto);
+        return dto;
+    }
+
+    private static <T> List<T> jsonbToList(JSONB jsonb, TypeReference<List<T>> typeRef) {
+        ObjectMapper mapper = new ObjectMapper();
+        if (jsonb == null) return List.of();
+        try {
+            return mapper.readValue(jsonb.data(), typeRef);
+        } catch (Exception e) {
+            log.error("[JSONB MAPPING ERROR] {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    private static List<SenseDto> jsonbToSenseDtoList(JSONB jsonb) {
+        return jsonbToList(jsonb, new TypeReference<>() {});
+    }
+    private static List<SynsetRelationForDetailsDto> jsonbToSynsetRelationDtoList(JSONB jsonb) {
+        return jsonbToList(jsonb, new TypeReference<>() {});
+    }
+    private static List<TagDto> jsonbToTagDtoList(JSONB jsonb) {
+        return jsonbToList(jsonb, new TypeReference<>() {});
+    }
+    private static List<String> jsonbToStringList(JSONB jsonb) {
+        return jsonbToList(jsonb, new TypeReference<>() {});
+    }
+    private static List<ExternalReferenceDto> jsonbToExternalReferenceList(JSONB jsonb) {
+        return jsonbToList(jsonb, new TypeReference<>() {});
     }
 }

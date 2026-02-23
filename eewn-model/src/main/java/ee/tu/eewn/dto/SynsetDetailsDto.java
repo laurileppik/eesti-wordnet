@@ -16,7 +16,8 @@ public class SynsetDetailsDto {
     private String comment;
     private List<String> definitions;
     private List<SenseDto> senses;
-    private List<SynsetRelationDto> relations;
-    private List<TagDto> tags;
+    private List<SynsetRelationForDetailsDto> relations;
+    //TODO hetkel veits hack fix, tegelt võiks TagDTO olla. Aga samas pole peale väärtuse nkn vaja
+    private List<String> tags;
     private List<ExternalReferenceDto> externalReferences;
 }
