@@ -2,6 +2,7 @@ package ee.tu.eewn.controller;
 
 import ee.tu.eewn.dto.AutocompleteWordDto;
 import ee.tu.eewn.dto.WordWithRelationsDto;
+import ee.tu.eewn.service.AutoCompleteService;
 import ee.tu.eewn.service.WordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WordController {
     private final WordService wordService;
+    private final AutoCompleteService autoCompleteService;
 
     @GetMapping("/search")
     public ResponseEntity<List<WordWithRelationsDto>> searchWords(@RequestParam String query) {
@@ -22,12 +24,12 @@ public class WordController {
 
     @GetMapping("/word/{id}/relevant-words")
     public ResponseEntity<List<String>> getRelevantWords(@PathVariable Integer id) {
-        List<String> relevantWords = wordService.getRelevantWordsForSense(id);
+        List<String> relevantWords = autoCompleteService.getRelevantWordsForSense(id);
         return ResponseEntity.ok(relevantWords);
     }
 
     @GetMapping("/autocomplete")
     public ResponseEntity<List<AutocompleteWordDto>> autocompleteWords(@RequestParam String query) {
-        return ResponseEntity.ok(wordService.autocompleteWords(query));
+        return ResponseEntity.ok(autoCompleteService.autocompleteWords(query));
     }
 }
