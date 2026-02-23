@@ -127,14 +127,8 @@ public class ExternalReferenceService {
     }
 
     private String formatSenseLabel(WnwbSense sense) {
-        String lemma = sense.getLexicalEntry().getLemma();
         String label = sense.getLabel();
-        String pos = sense.getLexicalEntry().getPartOfSpeech();
-
-        if (label != null && !label.isBlank()) {
-            return lemma + " " + label + "(" + pos + ")";
-        }
-        return lemma + " (" + pos + ")";
+        return label != null && !label.isBlank() ? label : "";
     }
 
     private String extractDefinition(String reference, Map<String, WnwbSynset> synsetsByLabel,

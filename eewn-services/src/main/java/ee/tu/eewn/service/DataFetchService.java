@@ -38,6 +38,14 @@ public class DataFetchService {
             .toList();
     }
 
+    public List<String> getSenseLabelsForSynset(Integer synsetId) {
+        return senseRepository.findBySynsetId(synsetId).stream()
+            .map(WnwbSense::getLabel)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+    }
+
     public Map<Integer, List<WnwbSense>> groupSensesBySynsetId(Set<Integer> synsetIds) {
         if (synsetIds.isEmpty()) {
             return Collections.emptyMap();

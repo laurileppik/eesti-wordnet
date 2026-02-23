@@ -122,3 +122,18 @@
   font-size: 1.1em;
   vertical-align: middle;
 }
+.relevant-words-list {
+  margin-top: 0.2rem;
+}
+
+.relevant-word {
+  display: inline-block;
+  margin-right: 0.25em;
+  word-break: keep-all;
+  white-space: normal;
+}
+
+.word-wrap-block {
+  word-break: keep-all;
+  white-space: normal;
+}

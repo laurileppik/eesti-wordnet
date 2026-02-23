@@ -3,12 +3,16 @@
     @if (relationType) {
       <span><strong>{{ relationType }}:</strong> </span>
     }
-    <span>{{ word.label ? word.label : word.lemma }} <span style="color:#1976d2; font-weight:500;">({{ word.partOfSpeech }})</span></span>
-    @if (relevantWords.length > 0) {
-      <span style="color: #888; font-size: 0.95em;"> [{{ relevantWords.join(', ') }}]</span>
-    }
+    <span class="relevant-words-list">
+      @for (wordObj of formattedRelevantWords; track $index) {
+        <span class="relevant-word">
+          {{ wordObj.lemma }}@if (wordObj.subscript) {<sub class="sense-subscript">{{ wordObj.subscript }}</sub>}
+          @if (!$last){, }
+        </span>
+      }
+    </span>
     @if (word.definition) {
-      <span style="color:#444;"> - {{ word.definition }}</span>
+      <span class="word-wrap-block" style="color:#444;"> - {{ word.definition }}</span>
     }
     <span class="expand-icon" [attr.aria-label]="expanded ? 'Sulge' : 'Ava'">
       <mat-icon class="expand-icon-inner">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
@@ -20,13 +24,15 @@
   @if (externalReferences) {
     <div class="external-reference-container">
       <span class="external-reference-words">
-        {{ externalReferenceWords }}
+        @for (wordObj of formattedExternalReferenceWords; track $index) {
+          <span>
+            {{ wordObj.lemma }}@if (wordObj.subscript) {<sub class="sense-subscript">{{ wordObj.subscript }}</sub>}
+            @if (!$last){, }
+          </span>
+        }
       </span>
       <span class="external-reference-definition">
-        {{ externalReferences.definition }}
-      </span>
-      <span class="external-reference-system">
-        -- ({{ externalReferences.systemName }})
+        {{ externalReferences.definition }} -- ({{ externalReferences.systemName }})
       </span>
     </div>
   }

@@ -46,18 +46,24 @@
 
 .mat-form-field {
   width: 100%;
+  background: #fff;
+  box-shadow: none;
 }
 
 input[matInput] {
   font-size: 1.1em;
   border-radius: 0;
-  background: #f8fafd;
+  background: #fff;
   transition: none;
   padding: 0;
+  box-shadow: none;
+  border: 1px solid #e3eafc;
 }
 input[matInput]:focus {
   outline: none;
   background: #fff;
+  box-shadow: none;
+  border: 1.5px solid #1976d2;
 }
 
 button[mat-icon-button] {
@@ -85,7 +91,7 @@ button[mat-icon-button]:hover, button[mat-icon-button]:focus {
   transition: none;
   word-break: break-all;
   overflow-wrap: anywhere;
-  max-width: 900px;
+  //max-width: 900px;
   padding: 0 1.5em;
 }
 .group-card:hover {

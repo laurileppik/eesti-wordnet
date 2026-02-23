@@ -46,7 +46,7 @@ public class WordService implements InitializingBean {
                     dto.setLabel(sense.getLabel());
                     if (sense.getSynset() != null) {
                         dto.setSynsetId(sense.getSynset().getId());
-                        dto.setRelevantWords(dataFetchService.getLemmasForSynset(sense.getSynset().getId()));
+                        dto.setRelevantWords(dataFetchService.getSenseLabelsForSynset(sense.getSynset().getId()));
                         List<ExternalReferenceDto> externalRefs = externalReferenceService.getExternalReferences(sense.getSynset());
                         dto.setExternalReferences(externalRefs);
 

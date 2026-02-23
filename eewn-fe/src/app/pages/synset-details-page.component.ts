@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WordService } from '../services/word.service';
+import { parseSenseLabel, formatWords } from '../utils/word-utils';
 
 //TODO eraldi meetod?
 export interface Sense {
-  label?: string;
+  label: string;
   lemma?: string;
   partOfSpeech?: string;
   status?: string;
@@ -82,21 +83,11 @@ export class SynsetDetailsPageComponent implements OnInit {
     return [];
   }
 
-  //TODO veits hacky aga töötab
-  parseSenseLabel(label: string | undefined): { lemma: string, subscript: string } {
-    if (!label) return { lemma: '', subscript: '' };
-    const match = RegExp(/^(.*?)(_\d+\(.*\))$/).exec(label);
-    if (match) {
-      return { lemma: match[1], subscript: match[2].slice(1) };
-    }
-    return { lemma: label, subscript: '' };
-  }
-
   get labeledSenseExamples(): { lemma: string, subscript: string, example: string }[] {
     if (!this.synset?.senses) return [];
     const result: { lemma: string, subscript: string, example: string }[] = [];
     for (const sense of this.synset.senses as Sense[]) {
-      const parsed = this.parseSenseLabel(sense.label);
+      const parsed = parseSenseLabel(sense.label);
       if (Array.isArray(sense.examples) && sense.examples.length) {
         for (const ex of sense.examples) {
           result.push({
@@ -113,7 +104,7 @@ export class SynsetDetailsPageComponent implements OnInit {
   get formattedSenses(): { lemma: string, subscript: string, partOfSpeech?: string, status?: string, comment?: string }[] {
     if (!this.synset?.senses) return [];
     return (this.synset.senses as Sense[]).map(sense => {
-      const parsed = this.parseSenseLabel(sense.label);
+      const parsed = parseSenseLabel(sense.label);
       return {
         lemma: sense.lemma ?? '',
         subscript: parsed.subscript,
@@ -126,12 +117,7 @@ export class SynsetDetailsPageComponent implements OnInit {
 
   get formattedHeaderSenses(): { lemma: string, subscript: string }[] {
     if (!this.synset?.senses) return [];
-    return (this.synset.senses as Sense[]).map(sense => this.parseSenseLabel(sense.label));
-  }
-
-  formatWords(words: (string | undefined)[]): { lemma: string, subscript: string }[] {
-    if (!Array.isArray(words)) return [];
-    return words.map(word => this.parseSenseLabel(word));
+    return (this.synset.senses as Sense[]).map(sense => parseSenseLabel(sense.label));
   }
 
   toggleRelations(): void {
@@ -226,11 +212,15 @@ export class SynsetDetailsPageComponent implements OnInit {
     //eriti see...
     return filtered.length
       ? filtered.map(word => {
-          const parsed = this.parseSenseLabel(word);
+          const parsed = parseSenseLabel(word);
           return parsed.subscript
             ? `${parsed.lemma}<sub class='sense-subscript'>${parsed.subscript}</sub>`
             : parsed.lemma;
         }).join(', ')
       : '';
+  }
+
+  getFormattedWords(words: (string | undefined)[]): { lemma: string, subscript: string }[] {
+    return formatWords(words);
   }
 }

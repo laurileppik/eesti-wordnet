@@ -142,7 +142,7 @@
                 }
                 @if (extRef.words && extRef.words.length) {
                   <div>
-                    @for (wordObj of formatWords(extRef.words); track $index) {
+                    @for (wordObj of getFormattedWords(extRef.words); track $index) {
                       <span>{{ wordObj.lemma }}<sub class="sense-subscript">{{ wordObj.subscript }}</sub></span>@if (!$last) {<span>, </span>}
                     }
                   </div>

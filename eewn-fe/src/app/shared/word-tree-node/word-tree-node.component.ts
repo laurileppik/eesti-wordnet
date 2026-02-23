@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { WordService, WordWithDefinitionDto } from '../../services/word.service';
+import { formatWords } from '../../utils/word-utils';
 
 @Component({
   selector: 'app-word-tree-node',
@@ -25,7 +26,7 @@ export class WordTreeNodeComponent implements OnInit {
 
   ngOnInit() {
     if (this.word?.relevantWords) {
-      this.relevantWords = this.word.relevantWords.filter(w => w !== this.word.lemma);
+      this.relevantWords = this.word.relevantWords;
     }
     if (this.word?.externalReferences && Array.isArray(this.word.externalReferences)) {
       this.externalReferences = this.word.externalReferences.find((ref: any) => ref.definition && ref.definition.trim() !== '');
@@ -45,12 +46,14 @@ export class WordTreeNodeComponent implements OnInit {
 
   objectKeys = Object.keys;
 
-  get externalReferenceWords(): string {
+  get formattedRelevantWords(): { lemma: string, subscript: string }[] {
+    return formatWords(this.relevantWords);
+  }
+
+  get formattedExternalReferenceWords(): { lemma: string, subscript: string }[] {
     if (this.externalReferences?.words) {
-      return this.externalReferences.words
-                 .map((w: string) => w.trim())
-                 .join(', ');
+      return formatWords(this.externalReferences.words);
     }
-    return '';
+    return [];
   }
 }
