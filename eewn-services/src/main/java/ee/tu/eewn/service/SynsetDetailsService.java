@@ -27,6 +27,7 @@ import static nu.studer.sample.tables.WnwbExternalrelationtype.WNWB_EXTERNALRELA
 @RequiredArgsConstructor
 public class SynsetDetailsService {
     private final DSLContext dsl;
+    private final ExternalReferenceService externalReferenceService;
 
     public String getSynsetDetails(Integer id) {
         var origSyn = WNWB_SYNSET.as("orig_syn");
@@ -47,8 +48,6 @@ public class SynsetDetailsService {
         var extSys = WNWB_EXTERNALSYSTEM.as("ext_sys");
         var extRelType = WNWB_EXTERNALRELATIONTYPE.as("ext_rel_type");
         var extSyn = WNWB_SYNSET.as("ext_syn");
-        var extSense = WNWB_SENSE.as("ext_sense");
-        var extLex = WNWB_LEXICALENTRY.as("ext_lex_entry");
         var extDef = WNWB_DEFINITION.as("ext_def");
         Field<JSONB> emptyJsonArray = cast(inline("[]"), JSONB.class);
 
@@ -149,54 +148,7 @@ public class SynsetDetailsService {
                 emptyJsonArray
             );
 
-        Field<JSONB> extWords =
-            coalesce(
-                field(
-                    select(jsonbArrayAgg(extSense.LABEL))
-                        .from(extSyn)
-                        .join(extSense)
-                        .on(extSense.SYNSET_ID.eq(extSyn.ID))
-                        .and(extSense.IS_DELETED.isFalse())
-                        .join(extLex)
-                        .on(extLex.ID.eq(extSense.LEXICAL_ENTRY_ID))
-                        .and(extLex.IS_DELETED.isFalse())
-                        .where(extSyn.LABEL.eq(extRef.REFERENCE))
-                ),
-                emptyJsonArray
-            );
-
-        Field<String> extDefinition =
-            field(
-                select(extDef.TEXT)
-                    .from(extSyn)
-                    .join(extDef)
-                    .on(extDef.SYNSET_ID.eq(extSyn.ID))
-                    .and(extDef.IS_DELETED.isFalse())
-                    .where(extSyn.LABEL.eq(extRef.REFERENCE))
-                    .limit(1)
-            );
-
-        Field<JSONB> externalReferences =
-            coalesce(
-                field(
-                    select(jsonbArrayAgg(
-                        jsonbObject(
-                            key("systemName").value(extSys.NAME),
-                            key("relationType").value(extRelType.NAME),
-                            key("reference").value(extRef.REFERENCE),
-                            key("words").value(extWords),
-                            key("definition").value(extDefinition)
-                        )
-                    ))
-                        .from(extRef)
-                        .join(extSys)
-                        .on(extSys.ID.eq(extRef.SYS_ID_ID))
-                        .join(extRelType)
-                        .on(extRelType.ID.eq(extRef.REL_TYPE_ID))
-                        .where(extRef.SYNSET_ID.eq(origSyn.ID))
-                ),
-                emptyJsonArray
-            );
+        Field<JSONB> externalReferences = externalReferenceService.getExternalReferences(origSense, extSyn, origLex, extRef, emptyJsonArray, extDef, extSys, extRelType, origSyn);
 
         Field<JSONB> json =
             jsonbObject(
