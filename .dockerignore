@@ -1,0 +1,7 @@
+build/
+node_modules/
+*.log
+*.tmp
+eewn-fe/node_modules/
+eewn-fe/build/
+eewn-rest/build/

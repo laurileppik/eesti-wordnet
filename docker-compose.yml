@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16
+    container_name: eewn-postgres
+    environment:
+      POSTGRES_DB: LOCAL-wndb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./misc/local-db-migrad/tables.sql:/docker-entrypoint-initdb.d/01_tables.sql
+      - ./misc/local-db-migrad/insertid.sql:/docker-entrypoint-initdb.d/02_insertid.sql
+  codegen:
+    image: gradle:8.14-jdk21
+    container_name: eewn-codegen
+    depends_on:
+      - db
+    working_dir: /workspace/eewn-shared
+    volumes:
+      - .:/workspace
+    environment:
+      JOOQ_DB_URL: jdbc:postgresql://db:5432/LOCAL-wndb
+      JOOQ_DB_USER: postgres
+      JOOQ_DB_PASSWORD: 1234
+    entrypoint: ["/bin/sh", "-c", "/workspace/wait-for-db-and-generate.sh"]
+
+  frontend:
+    build:
+      context: ./eewn-fe
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: .
+      dockerfile: eewn-rest/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - codegen

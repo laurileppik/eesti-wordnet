@@ -43,9 +43,12 @@ jooq {
 
                 jdbc = new Jdbc()
                 jdbc.driver = 'org.postgresql.Driver'
-                jdbc.url = 'jdbc:postgresql://localhost:5432/LOCAL-wndb'
-                jdbc.user = 'postgres'
-                jdbc.password = '1234'
+                //./gradlew -DJOOQ_DB_URL=jdbc:postgresql://localhost:5432/LOCAL-wndb generateJooq
+                //'jdbc:postgresql://localhost:5432/LOCAL-wndb'
+                //'jdbc:postgresql://db:5432/LOCAL-wndb'
+                jdbc.url = System.getenv('JOOQ_DB_URL') ?: System.getProperty('JOOQ_DB_URL') ?: 'jdbc:postgresql://db:5432/LOCAL-wndb'
+                jdbc.user = System.getenv('JOOQ_DB_USER') ?: 'postgres'
+                jdbc.password = System.getenv('JOOQ_DB_PASSWORD') ?: '1234'
                 jdbc.properties = [
                     new org.jooq.meta.jaxb.Property().withKey('PAGE_SIZE').withValue('2048')
                 ]
@@ -67,10 +70,22 @@ jooq {
 
                 generator.target = new Target()
                 generator.target.packageName = 'nu.studer.sample'
-                generator.target.directory = "${projectDir}/build/generated-src/jooq/main"
+                //LOCAL
+                //generator.target.directory = "${projectDir}/build/generated-src/jooq/main"
+                //Docker
+                generator.target.directory = "${projectDir}/generated-src/jooq/main"
                 generator.strategy = new Strategy()
                 generator.strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
             }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${projectDir}/generated-src/jooq/main"
+            //srcDir "${buildDir}/generated-src/jooq/main"
         }
     }
 }
