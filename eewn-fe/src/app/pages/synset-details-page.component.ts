@@ -193,6 +193,10 @@ export class SynsetDetailsPageComponent implements OnInit {
     return Object.keys(map).sort((a, b) => a.localeCompare(b)).map(type => ({ type, label: this.relationLabel(type), items: map[type] }));
   }
 
+  get otherRelationsCount(): number {
+    return this.otherRelationSections.reduce((acc, group) => acc + (group.items?.length || 0), 0);
+  }
+
   relationLabel(type: string) {
     if (!type) return 'Seosed';
     // TODO 1 need hardcoded. 2 Siia peaks juurde lisama sense'i, et nt element(1(n)) keemiline element((1n))

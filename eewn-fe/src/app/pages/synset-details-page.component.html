@@ -34,7 +34,7 @@
       </ul>
     </div>
   }
-  @if (formattedSenses.length) {
+  <!--@if (formattedSenses.length) {
     <b>Lemmad:</b>
     <ul>
       @for (sense of formattedSenses; track $index) {
@@ -47,13 +47,13 @@
         </li>
       }
     </ul>
-  }
+  }-->
 
   @if (hyponyms.length) {
     <div class="toggleable-section">
       <button type="button" class="toggle-header" (click)="toggleHyponyms()" [attr.aria-expanded]="hyponymsExpanded">
         <span class="toggle-icon" [style.transform]="hyponymsExpanded ? 'rotate(90deg)' : 'rotate(0deg)'">&#9654;</span>
-        Hüponüümid:
+        Hüponüümid ({{ hyponyms.length }}):
       </button>
       @if (hyponymsExpanded) {
         <div class="toggle-content">
@@ -73,7 +73,7 @@
     <div class="toggleable-section">
       <button type="button" class="toggle-header" (click)="toggleHypernyms()" [attr.aria-expanded]="hypernymsExpanded">
         <span class="toggle-icon">{{ hypernymsExpanded ? '▼' : '▶' }}</span>
-        Hüperonüümid:
+        Hüperonüümid ({{ hypernyms.length }}):
       </button>
       @if (hypernymsExpanded) {
         <div class="toggle-content">
@@ -93,7 +93,7 @@
     <div class="toggleable-section">
       <button type="button" class="toggle-header" (click)="toggleSection('seosed')" [attr.aria-expanded]="relationSectionsExpanded['seosed']">
         <span class="toggle-icon">{{ relationSectionsExpanded['seosed'] ? '▼' : '▶' }}</span>
-        Muud seosed:
+        Muud seosed ({{ otherRelationsCount }}):
       </button>
       @if (relationSectionsExpanded['seosed']) {
         <div class="toggle-content">
@@ -129,7 +129,7 @@
     <div class="toggleable-section">
       <button type="button" class="toggle-header" (click)="toggleExternalRefs()" [attr.aria-expanded]="externalReferencesExpanded">
         <span class="toggle-icon">{{ externalReferencesExpanded ? '▼' : '▶' }}</span>
-        Välised viited:
+        Välised seosed ({{ synset.externalReferences.length }}):
       </button>
       @if (externalReferencesExpanded) {
         <div class="toggle-content">
