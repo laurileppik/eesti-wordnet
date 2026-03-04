@@ -12,11 +12,18 @@ services:
     volumes:
       - ./misc/local-db-migrad/tables.sql:/docker-entrypoint-initdb.d/01_tables.sql
       - ./misc/local-db-migrad/insertid.sql:/docker-entrypoint-initdb.d/02_insertid.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d LOCAL-wndb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
   codegen:
     image: gradle:8.14-jdk21
     container_name: eewn-codegen
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     working_dir: /workspace/eewn-shared
     volumes:
       - .:/workspace
@@ -40,5 +47,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
-      - codegen
+      db:
+        condition: service_healthy
+      codegen:
+        condition: service_completed_successfully
