@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./eewn-fe
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: .
+      dockerfile: eewn-rest/Dockerfile
+    ports:
+      - "8080:8083"
+    environment:
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres.keeleressursid.ee:5432/wndb}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-changeme}
+      SERVER_PORT: 8083

@@ -46,7 +46,8 @@ jooq {
                 //./gradlew -DJOOQ_DB_URL=jdbc:postgresql://localhost:5432/LOCAL-wndb generateJooq
                 //'jdbc:postgresql://localhost:5432/LOCAL-wndb'
                 //'jdbc:postgresql://db:5432/LOCAL-wndb'
-                jdbc.url = System.getenv('JOOQ_DB_URL') ?: System.getProperty('JOOQ_DB_URL') ?: 'jdbc:postgresql://db:5432/LOCAL-wndb'
+                //'jdbc:postgresql://postgres.keeleressursid.ee:5432/wndb'
+                jdbc.url = System.getenv('JOOQ_DB_URL') ?: System.getProperty('JOOQ_DB_URL') ?: 'jdbc:postgresql://localhost:5432/LOCAL-wndb'
                 jdbc.user = System.getenv('JOOQ_DB_USER') ?: 'postgres'
                 jdbc.password = System.getenv('JOOQ_DB_PASSWORD') ?: '1234'
                 jdbc.properties = [
