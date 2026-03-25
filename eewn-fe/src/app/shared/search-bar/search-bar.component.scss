@@ -14,7 +14,6 @@
 
 .search-bar-center {
   width: 100%;
-  // vt kas vaja
   overflow-x: hidden;
 }
 
@@ -22,8 +21,10 @@
   flex: 1;
   min-width: 250px;
   font-size: 1.1em;
-  border: 1px solid #e3eafc;
-  background: #f8fafd;
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-regular);
+  border: 1px solid var(--color-blue-light);
+  background: var(--color-gray-pale);
   transition: none;
   box-shadow: none;
   border-radius: 0;
@@ -31,14 +32,14 @@
 }
 .search-input:focus {
   outline: none;
-  border: 1.5px solid #1976d2;
+  border: 1.5px solid var(--color-blue-deep);
   box-shadow: none;
 }
 
 .search-autocomplete-field {
   width: 420px;
   max-width: 95vw;
-  background: #fff;
+  background: var(--color-white);
   border-radius: 0;
   box-shadow: none;
   transition: none;
@@ -46,28 +47,29 @@
 
 .mat-form-field {
   width: 100%;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: none;
 }
 
 input[matInput] {
   font-size: 1.1em;
+  font-family: var(--font-family), sans-serif;
   border-radius: 0;
-  background: #fff;
+  background: var(--color-white);
   transition: none;
   padding: 0;
   box-shadow: none;
-  border: 1px solid #e3eafc;
+  border: 1px solid var(--color-blue-light);
 }
 input[matInput]:focus {
   outline: none;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: none;
-  border: 1.5px solid #1976d2;
+  border: 1.5px solid var(--color-blue-deep);
 }
 
 button[mat-icon-button] {
-  color: #1976d2;
+  color: var(--color-blue-deep);
   transition: none;
   border-radius: 0;
   padding: 0;
@@ -80,18 +82,18 @@ button[mat-icon-button]:hover, button[mat-icon-button]:focus {
 .mat-autocomplete-panel {
   border-radius: 0;
   box-shadow: none;
-  background: #fff;
+  background: var(--color-white);
   font-size: 1.08em;
+  font-family: var(--font-family), sans-serif;
 }
 
 .group-card {
-  background: #f8fafd;
+  background: var(--color-gray-pale);
   border-radius: 0;
   box-shadow: none;
   transition: none;
   word-break: break-all;
   overflow-wrap: anywhere;
-  //max-width: 900px;
   padding: 0 1.5em;
 }
 .group-card:hover {
@@ -100,16 +102,17 @@ button[mat-icon-button]:hover, button[mat-icon-button]:focus {
 
 .group-title {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family), sans-serif;
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 3px solid #007bff;
+  border-bottom: 3px solid var(--color-blue);
   letter-spacing: 0.5px;
   text-shadow: none;
 }
 
 .mat-option {
-  color: #000 !important;
+  color: var(--color-black) !important;
 }
 
 ul {

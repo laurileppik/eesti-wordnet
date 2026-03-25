@@ -9,24 +9,26 @@
 
 input[type="text"] {
   padding: 0.5em 1em;
-  border: 1px solid #b3c6e0;
+  border: 1px solid var(--color-blue-light);
   border-radius: 4px;
   font-size: 1em;
+  font-family: var(--font-family), sans-serif;
   margin-right: 0.5em;
 }
 
 button {
-  background: #1976d2;
-  color: #fff;
+  background: var(--color-blue-deep);
+  color: var(--color-white);
   border: none;
   border-radius: 4px;
   padding: 0.5em 1.2em;
   font-size: 1em;
+  font-family: var(--font-family), sans-serif;
   cursor: pointer;
   transition: background 0.2s;
 }
 button:hover {
-  background: #1565c0;
+  background: var(--color-blue-dark);
 }
 
 mat-card {

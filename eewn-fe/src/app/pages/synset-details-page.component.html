@@ -49,26 +49,6 @@
     </ul>
   }-->
 
-  @if (hyponyms.length) {
-    <div class="toggleable-section">
-      <button type="button" class="toggle-header" (click)="toggleHyponyms()" [attr.aria-expanded]="hyponymsExpanded">
-        <span class="toggle-icon" [style.transform]="hyponymsExpanded ? 'rotate(90deg)' : 'rotate(0deg)'">&#9654;</span>
-        Hüponüümid ({{ hyponyms.length }}):
-      </button>
-      @if (hyponymsExpanded) {
-        <div class="toggle-content">
-          <ul>
-            @for (rel of hyponyms; track $index) {
-              <li>
-                <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)" [innerHTML]="displayRelevantWords(rel)"></button>
-              </li>
-            }
-          </ul>
-        </div>
-      }
-    </div>
-  }
-
   @if (hypernyms.length) {
     <div class="toggleable-section">
       <button type="button" class="toggle-header" (click)="toggleHypernyms()" [attr.aria-expanded]="hypernymsExpanded">
@@ -79,6 +59,26 @@
         <div class="toggle-content">
           <ul>
             @for (rel of hypernyms; track $index) {
+              <li>
+                <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)" [innerHTML]="displayRelevantWords(rel)"></button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+
+  @if (hyponyms.length) {
+    <div class="toggleable-section">
+      <button type="button" class="toggle-header" (click)="toggleHyponyms()" [attr.aria-expanded]="hyponymsExpanded">
+        <span class="toggle-icon" [style.transform]="hyponymsExpanded ? 'rotate(90deg)' : 'rotate(0deg)'">&#9654;</span>
+        Hüponüümid ({{ hyponyms.length }}):
+      </button>
+      @if (hyponymsExpanded) {
+        <div class="toggle-content">
+          <ul>
+            @for (rel of hyponyms; track $index) {
               <li>
                 <button type="button" class="link-button" (click)="goToSynset(rel.relatedSynsetId)" [innerHTML]="displayRelevantWords(rel)"></button>
               </li>

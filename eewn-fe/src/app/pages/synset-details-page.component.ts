@@ -190,7 +190,21 @@ export class SynsetDetailsPageComponent implements OnInit {
       map[t] = map[t] || [];
       map[t].push(r);
     }
-    return Object.keys(map).sort((a, b) => a.localeCompare(b)).map(type => ({ type, label: this.relationLabel(type), items: map[type] }));
+    const types = Object.keys(map);
+
+    const priorityMap: Record<string, number> = {
+      'domain_topic': -10,
+      'fuzzynym': 10,
+    };
+
+    types.sort((a, b) => {
+      const pa = priorityMap[a] ?? 0;
+      const pb = priorityMap[b] ?? 0;
+      if (pa !== pb) return pa - pb;
+      return a.localeCompare(b);
+    });
+
+    return types.map(type => ({ type, label: this.relationLabel(type), items: map[type] }));
   }
 
   get otherRelationsCount(): number {

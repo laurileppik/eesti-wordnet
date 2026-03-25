@@ -1,7 +1,7 @@
 .word-tree-node {
-  background: #fff;
+  background: var(--color-white);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+  box-shadow: 0 2px 8px rgba(2, 97, 175, 0.07);
   margin-bottom: 0.7em;
   padding: 1em 1.2em;
   transition: box-shadow 0.25s, background 0.25s;
@@ -9,13 +9,15 @@
   overflow: hidden;
 }
 .word-tree-node:hover {
-  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.16);
-  background: #f8fafd;
+  box-shadow: 0 6px 24px rgba(2, 97, 175, 0.16);
+  background: var(--color-gray-pale);
+  //background: var(--color-white);
 }
 .word-header {
   font-size: 1.08em;
-  color: #1976d2;
-  font-weight: 600;
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-blue-deep);
   display: flex;
   align-items: center;
   gap: 0.5em;
@@ -25,19 +27,19 @@
   padding: 0.2em 0;
 }
 .word-header:focus {
-  outline: 2px solid #1976d2;
+  outline: 2px solid var(--color-blue-deep);
   outline-offset: 2px;
 }
 .word-header span {
   transition: color 0.2s;
 }
 .word-header:hover {
-  color: #1565c0;
-  background: #e9f2fb;
+  color: var(--color-blue-dark);
+  background: var(--color-blue-pale);
 }
 .word-children {
   margin-top: 0.5em;
-  border-left: 2px solid #e3eafc;
+  border-left: 2px solid var(--color-blue-light);
   padding-left: 0.7em;
   animation: dropdown-fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
 }
@@ -54,16 +56,17 @@
 .relation-type-block {
   margin-bottom: 0.5em;
   border-radius: 6px;
-  background: #f3f7fb;
+  background: var(--color-blue-pale);
   padding: 0.5em 0.7em 0.3em 0.7em;
-  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.06);
+  box-shadow: 0 1px 3px rgba(2, 97, 175, 0.06);
   transition: box-shadow 0.2s;
 }
 .relation-type-header {
-  color: #1565c0;
+  color: var(--color-blue-dark);
   font-size: 1em;
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 0.2em;
-  font-weight: 600;
 }
 .relation-type-block ul {
   margin: 0;
@@ -73,49 +76,51 @@
   margin-top: 0;
 }
 .details-btn {
-  background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
-  color: #fff;
+  background: linear-gradient(90deg, var(--color-blue-deep) 60%, var(--color-blue) 100%);
+  color: var(--color-white);
   border: none;
   border-radius: 6px;
   padding: 0.3em 1.2em;
   font-size: 1em;
-  font-weight: 500;
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-regular);
   cursor: pointer;
   margin-top: 0.6em;
   margin-bottom: 0.3em;
   transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.10);
+  box-shadow: 0 2px 8px rgba(2, 97, 175, 0.10);
 }
 .details-btn:hover, .details-btn:focus {
-  background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
+  background: linear-gradient(90deg, var(--color-blue-dark) 60%, var(--color-blue-deep) 100%);
+  box-shadow: 0 4px 16px rgba(2, 97, 175, 0.18);
   transform: translateY(-2px) scale(1.03);
 }
 .details-btn:active {
-  background: #0d47a1;
+  background: var(--color-blue-dark);
 }
 .external-reference-container {
-  background: #e3eafc;
+  background: var(--color-blue-light);
   border-radius: 4px;
   padding: 0.5em 0.8em;
   margin: 0.5em 0 0.5em 0;
   font-size: 1em;
+  font-family: var(--font-family), sans-serif;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5em;
-  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.07);
+  box-shadow: 0 1px 3px rgba(2, 97, 175, 0.07);
 }
 .external-reference-words {
-  font-weight: 500;
+  font-weight: var(--font-weight-bold);
   margin-right: 0.5em;
 }
 .external-reference-definition {
-  color: #444;
+  color: var(--color-gray-deep);
   margin-right: 0.5em;
 }
 .external-reference-system {
-  color: #888;
+  color: var(--color-gray);
   font-size: 0.95em;
 }
 .expand-icon-inner {
@@ -125,14 +130,12 @@
 .relevant-words-list {
   margin-top: 0.2rem;
 }
-
 .relevant-word {
   display: inline-block;
   margin-right: 0.25em;
   word-break: keep-all;
   white-space: normal;
 }
-
 .word-wrap-block {
   word-break: keep-all;
   white-space: normal;

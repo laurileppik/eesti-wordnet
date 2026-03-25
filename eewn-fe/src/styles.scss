@@ -1,6 +1,69 @@
+//TODO siia ilmselt paar kommentaari
+
+:root {
+  --font-family: 'Roboto', Arial, sans-serif;
+  --font-weight-light:   300;
+  --font-weight-regular: 400;
+  --font-weight-bold:    700;
+
+  --color-violet:        #7268D8;
+  --color-violet-deep:   #5141AE;
+  --color-violet-dark:   #301984;
+  --color-violet-light:  #D3C6F7;
+  --color-violet-pale:   #F0EEFF;
+
+  --color-yellow:        #E0B12B;
+  --color-yellow-deep:   #C98600;
+  --color-yellow-dark:   #915D00;
+  --color-yellow-light:  #FFDA99;
+  --color-yellow-pale:   #FFF5E3;
+
+  --color-red:           #EF6650;
+  --color-red-deep:      #C3351F;
+  --color-red-dark:      #9D1600;
+  --color-red-light:     #F7D4CB;
+  --color-red-pale:      #FFF4F4;
+
+  --color-blue:          #3185FF;
+  --color-blue-deep:     #0261AF;
+  --color-blue-dark:     #003E68;
+  --color-blue-light:    #92C4FF;
+  --color-blue-pale:     #DEF5FF;
+
+  --color-black:         #282828;
+  --color-white:         #FFFFFF;
+
+  --color-gray:          #9B9B9B;
+  --color-gray-deep:     #666666;
+  --color-gray-dark:     #303030;
+  --color-gray-light:    #D8D8D8;
+  --color-gray-pale:     #F4F4F4;
+}
+
 body {
   margin: 0;
-  background: #f8fafd;
+  background: var(--color-gray-pale);
   min-height: 100vh;
-  font-family: 'Roboto', Arial, sans-serif;
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-black);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-bold);
+}
+
+h4, h5, h6 {
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-bold);
+}
+
+p, li, span, td, th, label {
+  font-family: var(--font-family), sans-serif;
+  font-weight: var(--font-weight-regular);
+}
+
+.text-light {
+  font-weight: var(--font-weight-light);
 }
