@@ -50,7 +50,7 @@
   }-->
 
   @if (hypernyms.length) {
-    <div class="toggleable-section">
+    <div class="toggleable-section section--hypernym">
       <button type="button" class="toggle-header" (click)="toggleHypernyms()" [attr.aria-expanded]="hypernymsExpanded">
         <span class="toggle-icon">{{ hypernymsExpanded ? '▼' : '▶' }}</span>
         Hüperonüümid ({{ hypernyms.length }}):
@@ -70,7 +70,7 @@
   }
 
   @if (hyponyms.length) {
-    <div class="toggleable-section">
+    <div class="toggleable-section section--hyponym">
       <button type="button" class="toggle-header" (click)="toggleHyponyms()" [attr.aria-expanded]="hyponymsExpanded">
         <span class="toggle-icon" [style.transform]="hyponymsExpanded ? 'rotate(90deg)' : 'rotate(0deg)'">&#9654;</span>
         Hüponüümid ({{ hyponyms.length }}):
@@ -90,7 +90,7 @@
   }
 
   @if (otherRelationSections.length) {
-    <div class="toggleable-section">
+    <div class="toggleable-section section--other">
       <button type="button" class="toggle-header" (click)="toggleSection('seosed')" [attr.aria-expanded]="relationSectionsExpanded['seosed']">
         <span class="toggle-icon">{{ relationSectionsExpanded['seosed'] ? '▼' : '▶' }}</span>
         Muud seosed ({{ otherRelationsCount }}):
@@ -125,16 +125,16 @@
       }
     </div>
   }
-  @if (synset.externalReferences && synset.externalReferences.length) {
-    <div class="toggleable-section">
+  @if (filteredExternalReferences && filteredExternalReferences.length) {
+    <div class="toggleable-section section--external">
       <button type="button" class="toggle-header" (click)="toggleExternalRefs()" [attr.aria-expanded]="externalReferencesExpanded">
         <span class="toggle-icon">{{ externalReferencesExpanded ? '▼' : '▶' }}</span>
-        Välised seosed ({{ synset.externalReferences.length }}):
+        Välised seosed ({{ filteredExternalReferences.length }}):
       </button>
       @if (externalReferencesExpanded) {
         <div class="toggle-content">
           <ul>
-            @for (extRef of synset.externalReferences; track $index) {
+            @for (extRef of filteredExternalReferences; track $index) {
               <li>
                 <div><b>{{ extRef.systemName }} relation(s)</b></div>
                 @if (extRef.relationType) {

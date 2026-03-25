@@ -13,6 +13,7 @@
   background: var(--color-gray-pale);
   //background: var(--color-white);
 }
+
 .word-header {
   font-size: 1.08em;
   font-family: var(--font-family), sans-serif;
@@ -35,14 +36,17 @@
 }
 .word-header:hover {
   color: var(--color-blue-dark);
-  background: var(--color-blue-pale);
+  //TODO vb muuta pole praegu NLP värvides, aga ei leidnud head värvi ka
+  background: #e9f2fb;
 }
+
 .word-children {
   margin-top: 0.5em;
   border-left: 2px solid var(--color-blue-light);
   padding-left: 0.7em;
   animation: dropdown-fade-in 0.25s cubic-bezier(0.4,0,0.2,1);
 }
+
 @keyframes dropdown-fade-in {
   from {
     opacity: 0;
@@ -53,6 +57,7 @@
     transform: translateY(0) scaleY(1);
   }
 }
+
 .relation-type-block {
   margin-bottom: 0.5em;
   border-radius: 6px;
@@ -61,6 +66,7 @@
   box-shadow: 0 1px 3px rgba(2, 97, 175, 0.06);
   transition: box-shadow 0.2s;
 }
+
 .relation-type-header {
   color: var(--color-blue-dark);
   font-size: 1em;
@@ -68,13 +74,16 @@
   font-weight: var(--font-weight-bold);
   margin-bottom: 0.2em;
 }
+
 .relation-type-block ul {
   margin: 0;
   padding: 0;
 }
+
 .relation-type-block > ul > div:first-child {
   margin-top: 0;
 }
+
 .details-btn {
   background: linear-gradient(90deg, var(--color-blue-deep) 60%, var(--color-blue) 100%);
   color: var(--color-white);
@@ -90,14 +99,17 @@
   transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
   box-shadow: 0 2px 8px rgba(2, 97, 175, 0.10);
 }
+
 .details-btn:hover, .details-btn:focus {
   background: linear-gradient(90deg, var(--color-blue-dark) 60%, var(--color-blue-deep) 100%);
   box-shadow: 0 4px 16px rgba(2, 97, 175, 0.18);
   transform: translateY(-2px) scale(1.03);
 }
+
 .details-btn:active {
   background: var(--color-blue-dark);
 }
+
 .external-reference-container {
   background: var(--color-blue-light);
   border-radius: 4px;
@@ -111,31 +123,38 @@
   gap: 0.5em;
   box-shadow: 0 1px 3px rgba(2, 97, 175, 0.07);
 }
+
 .external-reference-words {
   font-weight: var(--font-weight-bold);
   margin-right: 0.5em;
 }
+
 .external-reference-definition {
   color: var(--color-gray-deep);
   margin-right: 0.5em;
 }
+
 .external-reference-system {
   color: var(--color-gray);
   font-size: 0.95em;
 }
+
 .expand-icon-inner {
   font-size: 1.1em;
   vertical-align: middle;
 }
+
 .relevant-words-list {
   margin-top: 0.2rem;
 }
+
 .relevant-word {
   display: inline-block;
   margin-right: 0.25em;
   word-break: keep-all;
   white-space: normal;
 }
+
 .word-wrap-block {
   word-break: keep-all;
   white-space: normal;

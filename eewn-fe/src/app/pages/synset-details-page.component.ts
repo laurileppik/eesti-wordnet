@@ -211,6 +211,32 @@ export class SynsetDetailsPageComponent implements OnInit {
     return this.otherRelationSections.reduce((acc, group) => acc + (group.items?.length || 0), 0);
   }
 
+  get filteredExternalReferences() {
+    if (!this.synset?.externalReferences) return [];
+    const filtered = (this.synset.externalReferences as any[]).filter(er => {
+      if (!er) return false;
+      if (er.definition === null || er.definition === undefined) return false;
+      if (typeof er.definition === 'string' && er.definition.trim() === '') return false;
+      return true;
+    });
+
+    const priority: Record<string, number> = {
+      'PWN-3.0': -10,
+      'CILI': -5,
+    };
+
+    filtered.sort((a, b) => {
+      const sa = String(a?.systemName ?? '');
+      const sb = String(b?.systemName ?? '');
+      const pa = priority[sa] ?? 0;
+      const pb = priority[sb] ?? 0;
+      if (pa !== pb) return pa - pb;
+      return sa.localeCompare(sb);
+    });
+
+    return filtered;
+  }
+
   relationLabel(type: string) {
     if (!type) return 'Seosed';
     // TODO 1 need hardcoded. 2 Siia peaks juurde lisama sense'i, et nt element(1(n)) keemiline element((1n))
