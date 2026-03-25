@@ -7,6 +7,8 @@ services:
       - "80:80"
     depends_on:
       - backend
+    networks:
+      - eewn-net
   backend:
     build:
       context: .
@@ -18,3 +20,11 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-changeme}
       SERVER_PORT: 8083
+    networks:
+      - eewn-net
+networks:
+  eewn-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.99.0/24
