@@ -36,6 +36,10 @@ export class SynsetDetailsPageComponent implements OnInit {
 
   constructor(private readonly route: ActivatedRoute, private readonly wordService: WordService, private readonly router: Router) {}
 
+  goBack() {
+    this.router.navigate(['/']);
+  }
+
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));

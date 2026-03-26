@@ -30,7 +30,7 @@
       <div class="group-title">{{ group.title }}</div>
       <div class="group-words">
         @for (word of group.words; track word.id) {
-          <div class="word-result">
+          <div class="word-result" [attr.data-word-id]="word.id">
             <app-word-tree-node [word]="word"></app-word-tree-node>
           </div>
         }

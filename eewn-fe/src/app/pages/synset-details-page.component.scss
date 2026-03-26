@@ -202,10 +202,10 @@ li:last-child {
 .section--hypernym {
   .toggle-header {
     color: var(--color-blue-deep);
-    background: linear-gradient(90deg, var(--color-white) 0%, var(--color-blue-pale) 100%);
+    background: linear-gradient(90deg, var(--color-white) 0%, var(--color-blue-light) 100%);
     border-left: 4px solid var(--color-blue-deep);
     box-shadow: 0 2px 8px rgba(2, 97, 175, 0.06);
-    &:hover, &:focus { background: linear-gradient(90deg, var(--color-white) 0%, var(--color-blue-pale) 100%); }
+    &:hover, &:focus { background: linear-gradient(90deg, var(--color-white) 0%, var(--color-blue-light) 100%); }
   }
   .toggle-icon {
     background: var(--color-blue-light);
@@ -289,3 +289,20 @@ span {
 }
 
 
+.back-row {
+  margin-bottom: 1rem;
+}
+
+.back-button {
+  background: linear-gradient(90deg, var(--color-blue-deep) 30%, var(--color-blue) 100%);
+  color: var(--color-white);
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-family), sans-serif;
+}
+
+.back-button:hover {
+  background: linear-gradient(90deg, var(--color-blue-dark) 30%, var(--color-blue-deep) 100%);
+}

@@ -5,6 +5,9 @@
   <div>Viga andmete laadimisel.</div>
 }
 @else if (synset) {
+  <div class="back-row">
+    <button type="button" class="back-button" (click)="goBack()">← Tagasi</button>
+  </div>
   <h2>
     @if (formattedHeaderSenses.length > 0) {
       @for (sense of formattedHeaderSenses; track $index; let isLast = $last) {

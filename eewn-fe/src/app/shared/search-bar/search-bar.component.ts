@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatAutocompleteModule, MatAutocomplete, MatAutocompleteTrigger } from '
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { WordService, WordWithDefinitionDto, AutocompleteWordDto } from '../../services/word.service';
+import { SearchStateService } from '../../services/search-state.service';
 import { WordTreeNodeComponent } from '../word-tree-node/word-tree-node.component';
 import { of } from 'rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
@@ -31,7 +32,7 @@ import { debounceTime, switchMap } from 'rxjs/operators';
     WordTreeNodeComponent,
   ],
 })
-export class SearchBarComponent {
+export class SearchBarComponent implements OnInit {
   query = '';
   results: WordWithDefinitionDto[] = [];
   filteredOptions: AutocompleteWordDto[] = [];
@@ -39,7 +40,17 @@ export class SearchBarComponent {
   @ViewChild('auto') autocompletePanel?: MatAutocomplete;
   @ViewChild(MatAutocompleteTrigger) autocompleteTrigger?: MatAutocompleteTrigger;
 
-  constructor(private readonly wordService: WordService, private readonly snackBar: MatSnackBar) {}
+  constructor(private readonly wordService: WordService, private readonly snackBar: MatSnackBar, public readonly searchState: SearchStateService) {}
+
+  ngOnInit() {
+    if (this.searchState.query) {
+      this.query = this.searchState.query;
+      this.results = this.searchState.results || [];
+      if (this.searchState.selectedWordId) {
+        setTimeout(() => this.scrollToSelected(), 150);
+      }
+    }
+  }
 
   onInput() {
     if (this.query.length > 0) {
@@ -73,6 +84,8 @@ export class SearchBarComponent {
         if (words.length === 0) {
           this.snackBar.open('Tulemusi ei leitud', 'OK', { duration: 4000, panelClass: 'mat-warn' });
         }
+        this.searchState.query = this.query;
+        this.searchState.results = this.results;
       });
     }
   }
@@ -101,5 +114,17 @@ export class SearchBarComponent {
 
   trackWord(index: number, word: WordWithDefinitionDto) {
     return word.id;
+  }
+
+  private scrollToSelected() {
+    const id = this.searchState.selectedWordId;
+    if (!id) return;
+    const el = document.querySelector(`[data-word-id="${id}"]`);
+    if (el) {
+      (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.add('search-selected-highlight');
+      setTimeout(() => el.classList.remove('search-selected-highlight'), 1500);
+    }
+    this.searchState.clearSelection();
   }
 }

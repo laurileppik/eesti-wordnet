@@ -18,9 +18,11 @@
       <mat-icon class="expand-icon-inner">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
     </span>
   </div>
-  <button class="details-btn" [routerLink]="['/synsets', word.synsetId]" *ngIf="word.synsetId">
-    Üksikasjad
-  </button>
+  @if (word.synsetId) {
+    <button class="details-btn" (click)="searchState.selectedWordId = word.id" [routerLink]="['/synsets', word.synsetId]">
+      Üksikasjad
+    </button>
+  }
   @if (externalReferences) {
     <div class="external-reference-container">
       <span class="external-reference-words">

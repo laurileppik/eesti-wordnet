@@ -100,6 +100,11 @@ button[mat-icon-button]:hover, button[mat-icon-button]:focus {
   box-shadow: none;
 }
 
+.search-selected-highlight {
+  box-shadow: 0 0 0 4px rgba(49,133,255,0.12) inset;
+  transition: box-shadow 0.25s ease;
+}
+
 .group-title {
   font-size: 2rem;
   font-weight: var(--font-weight-bold);
