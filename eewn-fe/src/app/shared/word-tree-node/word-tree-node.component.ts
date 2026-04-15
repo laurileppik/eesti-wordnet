@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { WordService, WordWithDefinitionDto } from '../../services/word.service';
 import { formatWords } from '../../utils/word-utils';
@@ -23,7 +23,7 @@ export class WordTreeNodeComponent implements OnInit {
   relevantWords: string[] = [];
   externalReferences: any = null;
 
-  constructor(private readonly wordService: WordService, public readonly searchState: SearchStateService) {}
+  constructor(private readonly wordService: WordService, public readonly searchState: SearchStateService, private readonly router: Router) {}
 
   ngOnInit() {
     if (this.word?.relevantWords) {
@@ -48,6 +48,14 @@ export class WordTreeNodeComponent implements OnInit {
         this.relations = relations;
         this.loading = false;
       });
+    }
+  }
+
+  navigateToSynset(event: Event) {
+    event.stopPropagation();
+    if (this.word.synsetId) {
+      this.searchState.selectedWordId = this.word.id;
+      this.router.navigate(['/synsets', this.word.synsetId]);
     }
   }
 

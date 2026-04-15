@@ -94,8 +94,8 @@
   font-family: var(--font-family), sans-serif;
   font-weight: var(--font-weight-regular);
   cursor: pointer;
-  margin-top: 0.6em;
-  margin-bottom: 0.3em;
+  margin-left: auto;
+  flex-shrink: 0;
   transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
   box-shadow: 0 2px 8px rgba(2, 97, 175, 0.10);
 }

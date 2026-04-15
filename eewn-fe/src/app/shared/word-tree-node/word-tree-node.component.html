@@ -1,5 +1,5 @@
 <div class="word-tree-node">
-  <div class="word-header" (click)="toggleExpand()" role="button" [attr.tabindex]="0" (keydown.enter)="toggleExpand()">
+  <div class="word-header" (click)="navigateToSynset($event)" role="button" [attr.tabindex]="0" (keydown.enter)="navigateToSynset($event)" style="cursor:pointer;">
     @if (relationType) {
       <span><strong>{{ relationType }}:</strong> </span>
     }
@@ -14,15 +14,17 @@
     @if (word.definition) {
       <span class="word-wrap-block" style="color:#444;"> - {{ word.definition }}</span>
     }
-    <span class="expand-icon" [attr.aria-label]="expanded ? 'Sulge' : 'Ava'">
-      <mat-icon class="expand-icon-inner">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+    <!--
+    <span class="expand-icon" [attr.aria-label]="'Ava'">
+      <mat-icon class="expand-icon-inner">expand_more</mat-icon>
     </span>
+    -->
+    @if (word.synsetId) {
+      <button class="details-btn" (click)="navigateToSynset($event)">
+        Edasi
+      </button>
+    }
   </div>
-  @if (word.synsetId) {
-    <button class="details-btn" (click)="searchState.selectedWordId = word.id" [routerLink]="['/synsets', word.synsetId]">
-      Üksikasjad
-    </button>
-  }
   @if (externalReferences) {
     <div class="external-reference-container">
       <span class="external-reference-words">
@@ -38,6 +40,7 @@
       </span>
     </div>
   }
+  <!--
   @if (expanded) {
     <div class="word-children" style="margin-left: 0.3em;">
       @if (loading) {
@@ -64,4 +67,5 @@
       }
     </div>
   }
+  -->
 </div>
