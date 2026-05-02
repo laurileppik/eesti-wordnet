@@ -1,8 +1,15 @@
 import { Routes } from '@angular/router';
-import { SearchPageComponent } from './pages/search-page/search-page.component';
-import { SynsetDetailsPageComponent } from './pages/synset-details-page.component';
 
+//TODO kõik muu routei tagasi / peale (nt suvaline URL)
 export const routes: Routes = [
-  { path: '', component: SearchPageComponent },
-  { path: 'synsets/:id', component: SynsetDetailsPageComponent },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/search-page/search-page.component').then(m => m.SearchPageComponent),
+  },
+  {
+    path: 'synsets/:id',
+    loadComponent: () =>
+      import('./pages/synset-details-page.component').then(m => m.SynsetDetailsPageComponent),
+  },
 ];
