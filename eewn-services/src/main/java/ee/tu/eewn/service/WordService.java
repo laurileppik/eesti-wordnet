@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.jooq.*;
@@ -29,6 +31,7 @@ import static nu.studer.sample.tables.WnwbExternalrelationtype.WNWB_EXTERNALRELA
 import static nu.studer.sample.tables.WnwbLexicon.WNWB_LEXICON;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WordService implements InitializingBean {
     private final ExternalReferenceService externalReferenceService;
@@ -38,12 +41,17 @@ public class WordService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         searchCache = Caffeine.newBuilder()
-                .expireAfterWrite(60, TimeUnit.MINUTES)
-                .maximumSize(1000)
+                .expireAfterWrite(30, TimeUnit.MINUTES)
+                .maximumSize(500)
                 .build();
     }
 
     public List<WordWithRelationsDto> searchWords(String query) {
+        List<WordWithRelationsDto> cached = searchCache.getIfPresent(query.toLowerCase());
+        if (cached != null) {
+            log.debug("[SEARCH WORDS CACHE HIT] id={}", query.toLowerCase());
+            return cached;
+        }
         var origSense = WNWB_SENSE.as("orig_sense");
         var origLex = WNWB_LEXICALENTRY.as("orig_lex_entry");
         var origSyn = WNWB_SYNSET.as("orig_syn");
@@ -100,7 +108,7 @@ public class WordService implements InitializingBean {
             .and(origSense.IS_DELETED.isFalse())
             .fetch();
 
-        return result.stream().map(r -> {
+        List<WordWithRelationsDto> resultList = result.stream().map(r -> {
             WordWithRelationsDto dto = new WordWithRelationsDto();
             dto.setId(r.get(idField));
             dto.setLemma(r.get(lemmaField));
@@ -112,6 +120,8 @@ public class WordService implements InitializingBean {
             dto.setExternalReferences(jsonbToExternalReferenceList(r.get(externalReferencesField)));
             return dto;
         }).toList();
+        searchCache.put(query.toLowerCase(), resultList);
+        return resultList;
     }
 
     private static Field<JSONB> getRelevantWordsField(

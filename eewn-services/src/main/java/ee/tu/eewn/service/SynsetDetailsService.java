@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.jooq.*;
+import org.jooq.conf.Settings;
 import org.springframework.stereotype.Service;
 
 import static org.jooq.impl.DSL.*;
@@ -26,16 +27,34 @@ import ee.tu.eewn.dto.TagDto;
 import ee.tu.eewn.dto.ExternalReferenceDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.beans.factory.InitializingBean;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SynsetDetailsService {
+public class SynsetDetailsService implements InitializingBean {
     private final DSLContext dsl;
     private final ExternalReferenceService externalReferenceService;
+    private Cache<Integer, SynsetDetailsDto> synsetDetailsCache;
+
+    @Override
+    public void afterPropertiesSet() {
+        synsetDetailsCache = Caffeine.newBuilder()
+                .expireAfterWrite(30, TimeUnit.MINUTES)
+                .maximumSize(500)
+                .build();
+    }
 
     public SynsetDetailsDto getSynsetDetails(Integer id) {
+        SynsetDetailsDto cached = synsetDetailsCache.getIfPresent(id);
+        if (cached != null) {
+            log.debug("[SYNSET DETAILS CACHE HIT] id={}", id);
+            return cached;
+        }
         var origSyn = WNWB_SYNSET.as("orig_syn");
         var origSynDef = WNWB_DEFINITION.as("orig_syn_def");
         var origSense = WNWB_SENSE.as("orig_sense");
@@ -156,22 +175,30 @@ public class SynsetDetailsService {
 
         Field<JSONB> externalReferences = externalReferenceService.getExternalReferences(origSense, extSyn, origLex, extRef, emptyJsonArray, extDef, extSys, extRelType, origSyn);
 
-        var synsetDetailsRecord = dsl.select(
-                origSyn.ID,
-                origSyn.LABEL,
-                origSyn.SYNSET_TYPE,
-                origSyn.STATUS,
-                origSyn.COMMENT,
-                definitions,
-                senses,
-                relations,
-                tags,
-                externalReferences
-            )
-            .from(origSyn)
-            .where(origSyn.ID.eq(id))
-            .and(origSyn.IS_DELETED.isFalse())
-            .fetchOne();
+
+        DSLContext prettyDsl = dsl.configuration()
+                                  .derive(new Settings().withRenderFormatted(true))
+                                  .dsl();
+
+
+        var query = dsl.select(
+                           origSyn.ID,
+                           origSyn.LABEL,
+                           origSyn.SYNSET_TYPE,
+                           origSyn.STATUS,
+                           origSyn.COMMENT,
+                           definitions,
+                           senses,
+                           relations,
+                           tags,
+                           externalReferences
+                       )
+                       .from(origSyn)
+                       .where(origSyn.ID.eq(id))
+                       .and(origSyn.IS_DELETED.isFalse());
+
+        log.debug("[SYNSET DETAILS SQL]\n{}", prettyDsl.renderInlined(query));
+        var synsetDetailsRecord = query.fetchOne();
 
         if (synsetDetailsRecord == null) return null;
 
@@ -188,6 +215,7 @@ public class SynsetDetailsService {
         dto.setTags(jsonbToStringList(synsetDetailsRecord.get(tags)));
         dto.setExternalReferences(jsonbToExternalReferenceList(synsetDetailsRecord.get(externalReferences)));
         log.debug("[SYNSET DETAILS] {}", dto);
+        synsetDetailsCache.put(id, dto);
         return dto;
     }
 
